@@ -80,8 +80,21 @@
   function setTheme(t){ document.documentElement.setAttribute('data-theme', t);
     try{ localStorage.setItem('viz-theme', t); }catch(e){}
     document.getElementById('themeBtn').textContent = (t==='dark' ? '☀ Light' : '☾ Dark');
-    applyChartDefaults(); eachChart(c=> c.update()); }
+    applyChartDefaults(); eachChart(c=> c.update()); renderMermaid(); }
   function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
+
+  // Mermaid diagrams stay theme-synced. Add a diagram by inlining Mermaid in {{LIB}} and dropping a
+  // <pre class="mermaid">…source…</pre> into the content — the template renders it and re-themes it. No manual init needed.
+  var _mmd = [];
+  function initMermaidSources(){ if(typeof mermaid==='undefined') return;
+    document.querySelectorAll('pre.mermaid, .mermaid').forEach(el=> _mmd.push([el, el.textContent])); }
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
+    var theme = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'default';
+    mermaid.initialize({ startOnLoad:false, theme:theme, securityLevel:'loose' });
+    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+    try{ mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) }); }catch(e){} }
+  initMermaidSources();
+
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
   applyChartDefaults();
 
@@ -89,11 +102,11 @@
   window.addEventListener('beforeprint', function(){
     _prevTheme = document.documentElement.getAttribute('data-theme');
     if(_prevTheme!=='light'){ document.documentElement.setAttribute('data-theme','light'); applyChartDefaults(); }
-    eachChart(c=>{ c.resize(); c.update('none'); });
+    eachChart(c=>{ c.resize(); c.update('none'); }); renderMermaid();
   });
   window.addEventListener('afterprint', function(){
     if(_prevTheme && _prevTheme!=='light'){ document.documentElement.setAttribute('data-theme',_prevTheme); applyChartDefaults(); }
-    eachChart(c=>{ c.resize(); c.update('none'); });
+    eachChart(c=>{ c.resize(); c.update('none'); }); renderMermaid();
   });
   function printPage(){ window.print(); }
   document.addEventListener('keydown', e=>{ if(e.key==='p'||e.key==='P'){ printPage(); e.preventDefault(); } });

@@ -5,7 +5,11 @@ description: Turn data files (CSV/JSON/Excel), code/architecture, logs/command o
 
 # Visualize
 
-Produce a visual from whatever the user gives you. The default and primary output is **one self-contained HTML file** that opens in any browser with no server. This skill ships bundled copies of **Chart.js** and **Mermaid** under `assets/lib/` so output can work **fully offline**.
+Produce a visual from whatever the user gives you. The default and primary output is **one self-contained HTML file** that opens in any browser with no server. This skill ships bundled copies of **Chart.js** and **Mermaid** under `assets/lib/`.
+
+**Two standing defaults:**
+- **Fully offline by default.** Always inline the bundled libraries (Chart.js *and* Mermaid) into the HTML so it works with zero network access and nothing leaves the machine. Do not use CDN links unless the user explicitly asks for a smaller file.
+- **Lean on diagrams.** Whenever a diagram would make something easier to understand, add one (Mermaid) — don't wait to be asked. Diagrams are inlined and therefore offline like everything else.
 
 ## Workflow
 
@@ -23,13 +27,13 @@ Pick the closest match (a request can combine several):
 
 If the request is ambiguous about what to draw, ask **one** brief question, then proceed.
 
-### 2. Ask the two runtime questions (only if not already clear)
-Ask these together, concisely. If the user already stated a preference, skip.
+**Add a diagram wherever it aids understanding.** Beyond the literal request, proactively include a **Mermaid diagram** whenever it makes the result clearer — a process/flow, a system or folder architecture, a sequence of interactions, a decision tree, a data model (ER), a state machine, a timeline, or how parts relate. In pages, reports, and decks especially, prefer "show it as a diagram" over a dense paragraph; aim to include at least one diagram for anything involving a process, structure, or relationship. Keep diagrams readable (group, label, ≤ ~25 nodes).
 
-1. **Privacy** — "Should this be fully local (no internet needed to view), or is loading chart libraries from a CDN fine?"
-   - **Fully local / sensitive data** → embed libraries by **inlining the bundled files** from `assets/lib/` directly into the HTML (see "Embedding libraries"). Nothing leaves the machine.
-   - **CDN is fine** → use CDN `<script>` tags (smaller output file). Data is still embedded locally in the file either way.
-2. **Output format** — default is **self-contained HTML**. Offer alternatives only if useful: **Mermaid** text (for markdown/docs), or **SVG/PNG** (static image). If the user doesn't care, use HTML.
+### 2. Defaults — don't interrogate the user
+Proceed with these defaults; ask a question only if the *request itself* is ambiguous (not to confirm setup):
+
+- **Fully offline (default, always):** inline the bundled libraries from `assets/lib/` — **both Chart.js and Mermaid** — directly into the HTML (see "Embedding libraries"). The file works with no internet and nothing leaves the machine. Use CDN `<script>` tags **only** if the user explicitly asks for a smaller file and accepts needing internet to view.
+- **Output format (default):** self-contained HTML. Offer **Mermaid** text or **SVG/PNG** only if the user asks or it's clearly better for their use.
 
 ### 3. Read and understand the input
 - For data files: read the file, infer columns/types, pick sensible x/y and a chart type that fits the data shape. Aggregate/clean as needed. Never invent data — chart only what's present.
@@ -88,10 +92,10 @@ When extracting `.xlsx`, point the extractor's output into the run folder's `dat
 When the user describes what they want rather than handing you data — e.g. "make a 6-slide deck introducing our onboarding process", "build an HTML landing page for a coffee subscription", "turn these notes into a one-pager", "create an interactive HTML page that shows a countdown" — **you author the content**, then render it into a self-contained HTML file:
 
 1. **Pick the shape:** a *presentation* → `slides.html`; a *page / document / landing page / report / dashboard* → `page.html`; if it's really just a chart or a diagram, use those templates instead.
-2. **Draft the content** from the request and your own knowledge. Keep presentations to one idea per slide; keep pages well-structured (clear headings, short paragraphs, `.card`/`.grid`/tables where useful). You may embed charts (Chart.js) or diagrams (Mermaid) inside a page or slides when they help. For a polished, non-generic look, apply the **"Visual polish"** section of `references/authoring.md` — commit to one aesthetic direction and set an offline font preset via `--display-font`/`--body-font`. (Applies to `page.html`/`slides.html` only; keep charts/diagrams neutral.)
+2. **Draft the content** from the request and your own knowledge. Keep presentations to one idea per slide; keep pages well-structured (clear headings, short paragraphs, `.card`/`.grid`/tables where useful). Embed charts (Chart.js) where there's data, and **add a Mermaid diagram wherever it makes the content easier to understand** — for any process, architecture, timeline, or relationship, include at least one diagram rather than a dense paragraph. (Both libraries are inlined, so the page stays fully offline.) For a polished, non-generic look, apply the **"Visual polish"** section of `references/authoring.md` — commit to one aesthetic direction and set an offline font preset via `--display-font`/`--body-font`. (Applies to `page.html`/`slides.html` only; keep charts/diagrams neutral.)
 3. **Ask only what's needed:** if key specifics are missing (audience, length, tone, must-include points, brand color), ask one short question — otherwise proceed with sensible defaults and note the assumptions.
 4. **Accuracy:** only state facts you're confident in. For anything uncertain or time-sensitive, hedge, leave a clearly-marked placeholder (e.g. `[confirm figure]`), or ask — never fabricate specifics (names, stats, quotes, prices).
-5. Fill the template, apply the privacy/format choices below, write the file, and report the path.
+5. Fill the template, **inline the libraries (fully-offline default)**, write the file, and report the path.
 
 The theme toggle and PDF export are built into `page.html` and `slides.html`, so instruction-built decks and pages are print-ready and light/dark-switchable with no extra work.
 
@@ -116,17 +120,19 @@ Then Read the resulting JSON and build the chart from it. Default output is an a
 
 **Further fallbacks** if neither PowerShell nor Node is available, or the sheet is unusual: (1) if the user has Python with `pandas`/`openpyxl`, use `pandas.read_excel(...)`; (2) ask the user to **Save As → CSV** in Excel and point you at the CSV. Whichever path, chart only real values — never fabricate.
 
-## Embedding libraries (fully-local mode)
-Only include the library a given output actually needs (charts → Chart.js; diagrams / diagram-bearing slides → Mermaid). To inline, read the file from `assets/lib/` and place its contents inside a `<script>…</script>` tag where the template's `{{LIB}}` placeholder sits:
+## Embedding libraries (fully offline — the default)
+Inline **every** library the output uses. If a page has a chart *and* a diagram, inline **both** (Chart.js and Mermaid). To inline, read the file from `assets/lib/` and place its contents inside a `<script>…</script>` tag where the template's `{{LIB}}` placeholder sits:
 
 - Chart.js → `assets/lib/chart.umd.min.js`
 - Mermaid → `assets/lib/mermaid.min.js`
 
-For **CDN mode**, replace `{{LIB}}` with the CDN tag instead:
+(A pure content page with neither a chart nor a diagram needs no `{{LIB}}` at all.)
+
+**CDN mode is opt-in only** — use it *only* when the user explicitly asks for a smaller file and accepts needing internet to view. Then replace `{{LIB}}` with the CDN tag instead:
 - `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>`
 - `<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>`
 
-Mermaid is ~3 MB; inlining it makes a large file. That is expected and fine for offline use — mention the size to the user if it matters.
+Mermaid is ~3 MB, so a diagram-bearing offline file is ~3.3 MB (charts-only stays ~200 KB). That is the expected cost of offline diagrams — **do not** drop to CDN to shrink it unless the user asks; just mention the size if it's relevant.
 
 ## Output formats other than HTML
 - **Mermaid text**: just return the fenced ```mermaid block (no template needed).

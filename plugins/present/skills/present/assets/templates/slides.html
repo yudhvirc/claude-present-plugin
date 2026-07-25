@@ -169,8 +169,19 @@
   function setTheme(t){ document.documentElement.setAttribute('data-theme', t);
     try{ localStorage.setItem('viz-theme', t); }catch(e){}
     const b=document.getElementById('themeBtn'); if(b) b.textContent = (t==='dark' ? '☀ Light' : '☾ Dark');
-    applyChartDefaults(); eachChart(c=> c.update()); }
+    applyChartDefaults(); eachChart(c=> c.update()); renderMermaid(); }
   function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
+
+  // Mermaid diagrams on slides stay theme-synced. Inline Mermaid in {{LIB}} and put a
+  // <pre class="mermaid">…source…</pre> on a slide — the deck renders it and re-themes it automatically.
+  var _mmd = [];
+  function initMermaidSources(){ if(typeof mermaid==='undefined') return;
+    document.querySelectorAll('pre.mermaid, .mermaid').forEach(el=> _mmd.push([el, el.textContent])); }
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
+    var theme = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'default';
+    mermaid.initialize({ startOnLoad:false, theme:theme, securityLevel:'loose' });
+    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+    try{ mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) }); }catch(e){} }
 
   // PDF export via the browser's print dialog ("Save as PDF"). Fully offline.
   // Set PRINT_NOTES=true to also print each slide's speaker notes beneath it.
@@ -201,7 +212,8 @@
   if(start>=1 && start<=slides.length) i=start-1;
   render();
 
-  // Apply saved/initial theme and set Chart.js defaults BEFORE charts are created below.
+  // Capture any Mermaid sources, then apply saved/initial theme (renders diagrams + sets Chart.js defaults).
+  initMermaidSources();
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
 
   // CHART_INIT placeholder below: build any per-slide charts here using Chart.js. Don't hardcode

@@ -5,7 +5,8 @@ This is the detailed guide the `present` skill points to. Read it before generat
 ## Golden rules
 - **One self-contained file.** All data is embedded in the HTML. No fetch(), no external data files.
 - **Never fabricate data.** Chart/label only what exists in the source. If a value is missing, leave it out and say so.
-- **Only include the library the output needs.** Charts → Chart.js. Diagrams (or slides containing a Mermaid diagram) → Mermaid. Slides with only `<canvas>` charts → Chart.js. Slides with neither → no `{{LIB}}` at all.
+- **Fully offline by default — inline every library the output uses.** Charts → inline Chart.js. Any diagram (or a slide/page containing one) → inline Mermaid. Something with both → inline **both**. Only a page with neither needs no `{{LIB}}`. Use CDN links *only* if the user explicitly asks for a smaller file.
+- **Prefer diagrams.** Proactively add a Mermaid diagram wherever it makes something clearer — process/flow, architecture, sequence, decision tree, ER, state machine, timeline, or how parts relate. In pages/reports and decks, favor a diagram over a dense paragraph; aim for at least one wherever there's a process, structure, or relationship. (See the Mermaid diagram-type table below.)
 - **Theme-aware colors.** Every template has a light/dark toggle driven by CSS variables (`--bg --card --ink --muted --grid --accent`). Default is dark. **Do NOT hardcode chart tick/grid colors** — omit `scales.*.ticks.color` and `grid.color` so they inherit `Chart.defaults` and follow the theme. You may still set dataset/series colors (bars, lines, slices) — those stay constant across themes. Mermaid diagrams re-render with the matching Mermaid theme automatically.
 
 ## Built-in controls (all templates, nothing to fill in)
@@ -13,12 +14,13 @@ This is the detailed guide the `present` skill points to. Read it before generat
 - **PDF export** — ⤓ PDF button / `P` key → browser print dialog → "Save as PDF". `chart.html` and `diagram.html` switch to the light theme just for printing (readable on paper) and restore after; `slides.html` prints one landscape page per slide. These are wired via `beforeprint`/`afterprint` in each template — leave them intact.
 
 ## `{{LIB}}` — the one placeholder every template shares
-Decide from the privacy answer:
+**Default = inline (fully offline).** Inline every library the output uses (both Chart.js and Mermaid if the page has a chart and a diagram):
 
-- **Fully local:** read the bundled file and paste its contents inside a script tag:
+- read the bundled file and paste its contents inside a script tag:
   `<script>…entire contents of assets/lib/chart.umd.min.js…</script>`
-  (or `mermaid.min.js`). Use the Read tool on the lib file, then embed. Mermaid is ~3 MB — that's fine for offline.
-- **CDN OK:**
+  (and/or `mermaid.min.js`). Use the Read tool on the lib file, then embed. Mermaid is ~3 MB — expected for offline diagrams.
+
+**CDN — only if the user explicitly wants a smaller file** (needs internet to view):
   - Chart.js → `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>`
   - Mermaid → `<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>`
 
@@ -73,7 +75,7 @@ Keep it readable: group with `subgraph`, label edges, and don't exceed ~25 nodes
   - Body: `<h1>`/`<h2>` + short `<ul>`/`<p>`; or a `<div class="chart-wrap"><canvas id="deckChartN"></canvas></div>`.
   - One idea per slide. Large type, few words (the template scales font to viewport).
 - `{{CHART_INIT}}` — one `new Chart(...)` per slide canvas. Only include `{{LIB}}` (Chart.js) if at least one slide has a chart.
-- To put a **Mermaid diagram on a slide**, embed Mermaid as the lib, add `<pre class="mermaid">…</pre>` in the slide, and call `mermaid.initialize({startOnLoad:true})` in `{{CHART_INIT}}`.
+- To put a **Mermaid diagram on a slide**, inline Mermaid in `{{LIB}}` (alongside Chart.js if the deck also has charts) and add `<pre class="mermaid">…source…</pre>` on a slide. The template auto-renders it and re-themes it on toggle — **do NOT** call `mermaid.initialize` / `mermaid.run` yourself (that would double-render and break theme-sync).
 
 Built-in controls (no code needed): arrows/space/PageUp-Down/Home/End nav, Prev/Next buttons, counter, progress bar, **F** fullscreen, **S** notes, **Esc** overview grid, **P** / **⤓ PDF** export, swipe on touch, and deep-linking via `#<slide-number>`.
 
@@ -89,7 +91,7 @@ Use for anything that isn't primarily a single chart, diagram, or slide deck: la
 - `{{CONTENT}}` — the full page body inside `.container`. Use the provided classes: `.lead`, `.muted`, `.card`, `.grid` (auto-fit columns), `.badge`, `.btn`, styled `table`/`code`/`pre`. Structure with `<h2>`/`<h3>`. For a chart, drop `<div class="chart-wrap"><canvas id="p1"></canvas></div>` in the content and create it in `{{SCRIPT}}`.
 - `{{LIB}}` — include **only** if the page has a `<canvas>` chart (inline Chart.js or CDN). Omit for pure content pages.
 - `{{SCRIPT}}` — optional page JS (chart creation, interactivity). Charts follow the theme via `Chart.defaults` — don't hardcode tick/grid colors.
-- Theme toggle + PDF export are already wired in. For a Mermaid diagram inside a page, inline Mermaid as `{{LIB}}`, add `<pre class="mermaid">…</pre>` in the content, and call `mermaid.initialize({startOnLoad:true})` in `{{SCRIPT}}`.
+- Theme toggle + PDF export are already wired in. For a Mermaid diagram inside a page, inline Mermaid in `{{LIB}}` and add `<pre class="mermaid">…source…</pre>` in the content — the template renders it and keeps it theme-synced automatically. **Do NOT** call `mermaid.initialize` / `mermaid.run` in `{{SCRIPT}}` (that double-renders and breaks theme-sync).
 
 When authoring content from a user's instructions, generate accurate, well-organized copy; mark anything uncertain as `[confirm …]` rather than inventing specifics.
 
