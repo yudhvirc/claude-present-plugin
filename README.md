@@ -13,19 +13,64 @@ Invoke the skill and describe (or point at) what you want to present:
 
 Default output is **one self-contained `.html` file**. It also asks about **privacy** (fully-local → libraries are inlined so nothing needs the internet; or CDN if you prefer a smaller file) and can emit **Mermaid text** or **SVG** when you'd rather have those. Every run is written into an organized `present-output/<slug>/` folder (with an `index.html` landing page when there are multiple artifacts).
 
+## Installation
+
+**Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code). No runtime dependencies — generated HTML opens in any browser, fully offline. (PowerShell *or* Node.js is only needed to read `.xlsx` spreadsheets; both ship with most systems.)
+
+### Install from GitHub (recommended)
+In Claude Code, add this repo as a plugin marketplace, then install the plugin:
+```shell
+/plugin marketplace add yudhvirc/claude-present-plugin
+/plugin install present@present
+/reload-plugins
+```
+`present@present` = plugin **present** from the **present** marketplace. To update later: `/plugin marketplace update present`.
+
+### Local / development install
+```bash
+git clone https://github.com/yudhvirc/claude-present-plugin.git
+```
+Then, in Claude Code, add the cloned folder as a marketplace by absolute path:
+```shell
+/plugin marketplace add /absolute/path/to/claude-present-plugin
+/plugin install present@present
+/reload-plugins
+```
+
+### Team / project install (via settings)
+Commit this to a project's `.claude/settings.json` so everyone working in the repo gets it automatically:
+```json
+{
+  "extraKnownMarketplaces": {
+    "present": { "source": { "source": "github", "repo": "yudhvirc/claude-present-plugin" } }
+  },
+  "enabledPlugins": { "present@present": true }
+}
+```
+
+### Verify & manage
+```shell
+/plugin list               # should list present@present
+/plugin details present
+/plugin disable present    # or: /plugin enable present
+```
+
 ## Usage
-```
-/present
-```
-Then tell it what to present, e.g.:
+The skill **auto-activates** when you ask for something visual — just describe what you want:
 - "present sales.csv as a bar chart of revenue by region"
 - "diagram the architecture of the src/ folder"
 - "make a 6-slide deck from these Q3 numbers with a revenue chart"
 - "build an HTML landing page for a coffee subscription"
 
+You can also invoke it explicitly: `/present:present`.
+
+It will ask about **privacy** (fully-offline with libraries inlined, vs. smaller files via CDN) and **output format** (defaults to self-contained HTML; can also emit Mermaid text or SVG), then write the result into an organized `present-output/<slug>/` folder.
+
 ## Structure
 ```
-.claude-plugin/plugin.json        Plugin manifest
+.claude-plugin/
+  plugin.json                     Plugin manifest
+  marketplace.json                Marketplace listing (enables /plugin install)
 skills/present/
   SKILL.md                        Skill instructions (workflow)
   references/authoring.md         How to fill templates + chart/diagram recipes
@@ -33,14 +78,8 @@ skills/present/
   assets/lib/                     Bundled Chart.js + Mermaid (offline)
   assets/scripts/xlsx-to-json.ps1 Dependency-free .xlsx → JSON/CSV extractor (PowerShell)
   assets/scripts/xlsx-to-json.js  Dependency-free .xlsx → JSON/CSV extractor (Node.js)
+examples/                         Sample inputs + generated outputs
 ```
-
-## Install
-Clone the repo and load it as a Claude Code plugin:
-```bash
-git clone https://github.com/yudhvirc/claude-present-plugin.git
-```
-Point Claude Code at the cloned folder as a plugin (or add it to a plugin marketplace), then invoke it with `/present`. It requires no runtime dependencies — generated output opens in any browser, fully offline.
 
 ## License
 MIT — see [LICENSE](LICENSE). Bundles Chart.js and Mermaid (both MIT).

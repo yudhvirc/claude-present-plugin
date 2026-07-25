@@ -1,0 +1,14 @@
+{
+  "name": "present",
+  "owner": {
+    "name": "ACE System Design",
+    "email": "info@acesystemdesign.com"
+  },
+  "plugins": [
+    {
+      "name": "present",
+      "source": "./",
+      "description": "Turn data, code, logs, or plain instructions into self-contained, fully-offline HTML — Chart.js charts, Mermaid diagrams, keyboard-navigable slide decks, and pages."
+    }
+  ]
+}
