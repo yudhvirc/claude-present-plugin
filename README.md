@@ -55,6 +55,19 @@ Commit this to a project's `.claude/settings.json` so everyone working in the re
 /plugin disable present    # or: /plugin enable present
 ```
 
+### Troubleshooting
+**`Marketplace present not found`** — you must add the marketplace *before* installing (this error means the `add` step didn't register). Run the add first and confirm it appears:
+```shell
+/plugin marketplace add yudhvirc/claude-present-plugin
+/plugin marketplace list          # should show: present
+/plugin install present@present
+```
+If a stale entry is stuck, remove it and re-add:
+```shell
+/plugin marketplace remove present
+/plugin marketplace add yudhvirc/claude-present-plugin
+```
+
 ## Usage
 The skill **auto-activates** when you ask for something visual — just describe what you want:
 - "present sales.csv as a bar chart of revenue by region"
