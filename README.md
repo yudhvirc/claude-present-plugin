@@ -13,6 +13,18 @@ Invoke the skill and describe (or point at) what you want to present:
 
 Default output is **one self-contained `.html` file**. It also asks about **privacy** (fully-local → libraries are inlined so nothing needs the internet; or CDN if you prefer a smaller file) and can emit **Mermaid text** or **SVG** when you'd rather have those. Every run is written into an organized `present-output/<slug>/` folder (with an `index.html` landing page when there are multiple artifacts).
 
+## Preview
+Real, self-contained, fully-offline HTML output from `/present`:
+
+**Data → charts** (built from an Excel workbook, with a light/dark toggle + PDF export)
+![Charts dashboard](docs/screenshot-charts.png)
+
+**Presentation** — keyboard-navigable deck (arrows, fullscreen, speaker notes, PDF)
+![Slide deck](docs/screenshot-deck.png)
+
+**HTML page** — generated from a one-line instruction
+![Landing page](docs/screenshot-page.png)
+
 ## Installation
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code). No runtime dependencies — generated HTML opens in any browser, fully offline. (PowerShell *or* Node.js is only needed to read `.xlsx` spreadsheets; both ship with most systems.)
@@ -26,17 +38,6 @@ In Claude Code, add this repo as a plugin marketplace, then install the plugin:
 ```
 `present@present` = plugin **present** from the **present** marketplace. To update later: `/plugin marketplace update present`.
 
-### Local / development install
-```bash
-git clone https://github.com/yudhvirc/claude-present-plugin.git
-```
-Then, in Claude Code, add the cloned folder as a marketplace by absolute path:
-```shell
-/plugin marketplace add /absolute/path/to/claude-present-plugin
-/plugin install present@present
-/reload-plugins
-```
-
 ### Team / project install (via settings)
 Commit this to a project's `.claude/settings.json` so everyone working in the repo gets it automatically:
 ```json
@@ -46,6 +47,17 @@ Commit this to a project's `.claude/settings.json` so everyone working in the re
   },
   "enabledPlugins": { "present@present": true }
 }
+```
+
+### Developer / local install
+Clone the repo, then add the cloned folder as a marketplace by absolute path:
+```bash
+git clone https://github.com/yudhvirc/claude-present-plugin.git
+```
+```shell
+/plugin marketplace add /absolute/path/to/claude-present-plugin
+/plugin install present@present
+/reload-plugins
 ```
 
 ### Verify & manage
