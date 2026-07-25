@@ -38,7 +38,7 @@ skills/present/
 ## Install
 Clone the repo and load it as a Claude Code plugin:
 ```bash
-git clone https://github.com/genuinesingh/claude-present-plugin.git
+git clone https://github.com/yudhvirc/claude-present-plugin.git
 ```
 Point Claude Code at the cloned folder as a plugin (or add it to a plugin marketplace), then invoke it with `/present`. It requires no runtime dependencies — generated output opens in any browser, fully offline.
 
