@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "present",
-      "source": "./",
+      "source": "./plugins/present",
       "description": "Turn data, code, logs, or plain instructions into self-contained, fully-offline HTML — Chart.js charts, Mermaid diagrams, keyboard-navigable slide decks, and pages."
     }
   ]

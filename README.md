@@ -81,17 +81,17 @@ It will ask about **privacy** (fully-offline with libraries inlined, vs. smaller
 
 ## Structure
 ```
-.claude-plugin/
-  plugin.json                     Plugin manifest
-  marketplace.json                Marketplace listing (enables /plugin install)
-skills/present/
-  SKILL.md                        Skill instructions (workflow)
-  references/authoring.md         How to fill templates + chart/diagram recipes
-  assets/templates/               chart.html · diagram.html · slides.html · page.html
-  assets/lib/                     Bundled Chart.js + Mermaid (offline)
-  assets/scripts/xlsx-to-json.ps1 Dependency-free .xlsx → JSON/CSV extractor (PowerShell)
-  assets/scripts/xlsx-to-json.js  Dependency-free .xlsx → JSON/CSV extractor (Node.js)
-examples/                         Sample inputs + generated outputs
+.claude-plugin/marketplace.json     Marketplace listing (enables /plugin install)
+plugins/present/                    The plugin (source: ./plugins/present)
+  .claude-plugin/plugin.json        Plugin manifest
+  skills/present/
+    SKILL.md                        Skill instructions (workflow)
+    references/authoring.md         How to fill templates + chart/diagram recipes
+    assets/templates/               chart.html · diagram.html · slides.html · page.html
+    assets/lib/                     Bundled Chart.js + Mermaid (offline)
+    assets/scripts/xlsx-to-json.ps1 Dependency-free .xlsx → JSON/CSV extractor (PowerShell)
+    assets/scripts/xlsx-to-json.js  Dependency-free .xlsx → JSON/CSV extractor (Node.js)
+examples/                           Sample inputs + generated outputs
 ```
 
 ## License
