@@ -1,0 +1,27 @@
+[
+  {
+    "Region": "North America",
+    "Revenue": 1284000,
+    "Customers": 412
+  },
+  {
+    "Region": "Europe",
+    "Revenue": 842500,
+    "Customers": 318
+  },
+  {
+    "Region": "Asia Pacific",
+    "Revenue": 596300,
+    "Customers": 247
+  },
+  {
+    "Region": "Latin America",
+    "Revenue": 231800,
+    "Customers": 109
+  },
+  {
+    "Region": "Middle East & Africa",
+    "Revenue": 148900,
+    "Customers": 63
+  }
+]

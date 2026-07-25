@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northbrew — Fresh coffee, on your schedule</title>
+<style>
+  :root, html[data-theme="dark"] {
+    --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --border:#334155; --accent:#38bdf8; --link:#7dd3fc;
+  }
+  html[data-theme="light"] {
+    --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#475569; --border:#e2e8f0; --accent:#0284c7; --link:#0369a1;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); transition:background .2s,color .2s;
+         font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.65; }
+  .container { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
+  h1 { font-size:2.2rem; line-height:1.15; margin:0 0 .4em; }
+  h2 { font-size:1.5rem; margin:2em 0 .5em; border-bottom:1px solid var(--border); padding-bottom:.25em; }
+  h3 { font-size:1.15rem; margin:1.6em 0 .4em; }
+  p, li { color:var(--ink); }
+  a { color:var(--link); }
+  .lead { font-size:1.2rem; color:var(--muted); }
+  .muted { color:var(--muted); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin:16px 0; }
+  .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .badge { display:inline-block; background:var(--accent); color:#04212e; border-radius:999px; padding:2px 12px; font-size:.8rem; font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; }
+  th, td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
+  th { background:var(--panel); }
+  code, pre { background:var(--panel); border:1px solid var(--border); border-radius:8px; }
+  code { padding:.1em .4em; } pre { padding:14px 16px; overflow:auto; }
+  hr { border:0; border-top:1px solid var(--border); margin:2em 0; }
+  .btn { display:inline-block; background:var(--accent); color:#04212e; text-decoration:none; font-weight:600;
+         border-radius:10px; padding:10px 18px; margin:6px 8px 6px 0; }
+  .chart-wrap { position:relative; height:340px; margin:16px 0; }
+  .toolbar { position:fixed; top:16px; right:18px; display:flex; gap:8px; z-index:50; }
+  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:8px;
+                    padding:6px 12px; font-size:.85rem; cursor:pointer; }
+  .toolbar button:hover { border-color:var(--accent); }
+  @media print {
+    @page { margin: 16mm; }
+    body { background:#fff; }
+    .toolbar { display:none !important; }
+    .container { max-width:none; padding:0; }
+    .card, pre, table, .chart-wrap { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+  <button onclick="printPage()" title="Save as PDF (P)">⤓ PDF</button>
+</div>
+
+<div class="container">
+  <span class="badge">Coffee subscription</span>
+  <h1>Northbrew</h1>
+  <p class="lead">Freshly roasted, single-origin coffee delivered on the schedule you choose — pause or cancel anytime.</p>
+  <p><a class="btn" href="#plans">See plans</a><a class="btn" style="background:transparent;border:1px solid var(--border);color:var(--ink)" href="#how">How it works</a></p>
+
+  <h2 id="how">How it works</h2>
+  <div class="grid">
+    <div class="card"><h3>1 · Pick your roast</h3><p class="muted">Light, medium, or dark — or let us surprise you with a rotating seasonal pick.</p></div>
+    <div class="card"><h3>2 · Set a cadence</h3><p class="muted">Weekly, biweekly, or monthly. Change or skip a delivery whenever you like.</p></div>
+    <div class="card"><h3>3 · Roasted &amp; shipped</h3><p class="muted">We roast to order and ship within 24 hours, so it lands fresh at your door.</p></div>
+  </div>
+
+  <h2 id="plans">Plans</h2>
+  <table>
+    <thead><tr><th>Plan</th><th>Bags / month</th><th>Price / month</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td>Solo</td><td>1 (12 oz)</td><td>$18</td><td>One daily-cup drinker</td></tr>
+      <tr><td>Duo</td><td>2 (12 oz)</td><td>$32</td><td>A two-coffee household</td></tr>
+      <tr><td>Office</td><td>5 (12 oz)</td><td>$72</td><td>Small teams &amp; studios</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Prices are illustrative placeholders for this demo — <code>[confirm pricing before publishing]</code>.</p>
+
+  <h2>Why Northbrew</h2>
+  <ul>
+    <li><strong>Roasted to order</strong> — never sitting on a shelf.</li>
+    <li><strong>Direct-trade beans</strong> from named farms and cooperatives.</li>
+    <li><strong>Flexible &amp; commitment-free</strong> — skip, pause, or cancel in one click.</li>
+    <li><strong>Carbon-neutral shipping</strong> on every order.</li>
+  </ul>
+
+  <hr>
+  <p class="muted">Built by <code>/present</code> from a one-line instruction. Toggle light/dark (top-right) or press <strong>P</strong> to save as PDF. Fully self-contained — no internet required.</p>
+</div>
+
+<script>
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function applyChartDefaults(){ if(typeof Chart==='undefined') return;
+    Chart.defaults.color = cssVar('--ink'); Chart.defaults.borderColor = cssVar('--border'); }
+  function eachChart(fn){ if(typeof Chart==='undefined') return;
+    document.querySelectorAll('canvas').forEach(cv=>{ const c=Chart.getChart(cv); if(c){ try{ fn(c); }catch(e){} } }); }
+  function setTheme(t){ document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem('viz-theme', t); }catch(e){}
+    document.getElementById('themeBtn').textContent = (t==='dark' ? '☀ Light' : '☾ Dark');
+    applyChartDefaults(); eachChart(c=> c.update()); }
+  function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
+  (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
+  applyChartDefaults();
+  let _prevTheme=null;
+  window.addEventListener('beforeprint', function(){
+    _prevTheme = document.documentElement.getAttribute('data-theme');
+    if(_prevTheme!=='light'){ document.documentElement.setAttribute('data-theme','light'); applyChartDefaults(); }
+    eachChart(c=>{ c.resize(); c.update('none'); });
+  });
+  window.addEventListener('afterprint', function(){
+    if(_prevTheme && _prevTheme!=='light'){ document.documentElement.setAttribute('data-theme',_prevTheme); applyChartDefaults(); }
+    eachChart(c=>{ c.resize(); c.update('none'); });
+  });
+  function printPage(){ window.print(); }
+  document.addEventListener('keydown', e=>{ if(e.key==='p'||e.key==='P'){ printPage(); e.preventDefault(); } });
+</script>
+</body>
+</html>

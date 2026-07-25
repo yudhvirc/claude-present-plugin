@@ -1,0 +1,19 @@
+{
+  "name": "present",
+  "version": "0.1.0",
+  "description": "Turn data files, code/architecture, logs, or a plain description into self-contained HTML visuals — charts, diagrams, and keyboard-navigable PPT-style presentations. Local-first: bundles Chart.js + Mermaid so output works fully offline.",
+  "author": {
+    "name": "ACE System Design",
+    "email": "info@acesystemdesign.com"
+  },
+  "keywords": [
+    "visualization",
+    "charts",
+    "diagrams",
+    "mermaid",
+    "presentation",
+    "slides",
+    "html",
+    "offline"
+  ]
+}

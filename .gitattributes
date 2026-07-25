@@ -1,0 +1,2 @@
+# Normalize line endings to LF in the repository (keeps scripts/templates consistent cross-OS)
+* text=auto eol=lf

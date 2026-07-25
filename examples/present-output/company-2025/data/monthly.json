@@ -1,0 +1,86 @@
+[
+  {
+    "Month": "2025-01-28",
+    "Revenue": 182000,
+    "NewCustomers": 48,
+    "ChurnRatePct": 3.2,
+    "SupportTickets": 420
+  },
+  {
+    "Month": "2025-02-28",
+    "Revenue": 195400,
+    "NewCustomers": 55,
+    "ChurnRatePct": 3,
+    "SupportTickets": 398
+  },
+  {
+    "Month": "2025-03-28",
+    "Revenue": 211800,
+    "NewCustomers": 61,
+    "ChurnRatePct": 2.8,
+    "SupportTickets": 512
+  },
+  {
+    "Month": "2025-04-28",
+    "Revenue": 204300,
+    "NewCustomers": 52,
+    "ChurnRatePct": 3.1,
+    "SupportTickets": 467
+  },
+  {
+    "Month": "2025-05-28",
+    "Revenue": 228900,
+    "NewCustomers": 67,
+    "ChurnRatePct": 2.6,
+    "SupportTickets": 540
+  },
+  {
+    "Month": "2025-06-28",
+    "Revenue": 247600,
+    "NewCustomers": 74,
+    "ChurnRatePct": 2.4,
+    "SupportTickets": 610
+  },
+  {
+    "Month": "2025-07-28",
+    "Revenue": 239100,
+    "NewCustomers": 69,
+    "ChurnRatePct": 2.7,
+    "SupportTickets": 588
+  },
+  {
+    "Month": "2025-08-28",
+    "Revenue": 258700,
+    "NewCustomers": 78,
+    "ChurnRatePct": 2.3,
+    "SupportTickets": 505
+  },
+  {
+    "Month": "2025-09-28",
+    "Revenue": 276400,
+    "NewCustomers": 83,
+    "ChurnRatePct": 2.1,
+    "SupportTickets": 470
+  },
+  {
+    "Month": "2025-10-28",
+    "Revenue": 291200,
+    "NewCustomers": 88,
+    "ChurnRatePct": 2.2,
+    "SupportTickets": 432
+  },
+  {
+    "Month": "2025-11-28",
+    "Revenue": 310500,
+    "NewCustomers": 95,
+    "ChurnRatePct": 1.9,
+    "SupportTickets": 410
+  },
+  {
+    "Month": "2025-12-28",
+    "Revenue": 342800,
+    "NewCustomers": 104,
+    "ChurnRatePct": 1.7,
+    "SupportTickets": 395
+  }
+]
