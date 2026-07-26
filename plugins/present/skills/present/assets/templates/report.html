@@ -184,12 +184,17 @@
     lineColor:'#64748b', secondaryColor:'#f1f5f9', tertiaryColor:'#f1f5f9',
     clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff'
   }; }
-  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
-    var dark = document.documentElement.getAttribute('data-theme')==='dark';
-    mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
-      flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
-    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-    try{ mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) }); }catch(e){} }
+  var _rendering = null;
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return _rendering || Promise.resolve();
+    // Serialize renders so two mermaid.run() calls never overlap (overlap → intermittent "Syntax error in text").
+    _rendering = Promise.resolve(_rendering).catch(function(){}).then(function(){
+      var dark = document.documentElement.getAttribute('data-theme')==='dark';
+      mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
+        flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
+      _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+      return mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) });
+    });
+    return _rendering; }
 
   function setTheme(t){ document.documentElement.setAttribute('data-theme', t);
     try{ localStorage.setItem('viz-theme', t); }catch(e){}
@@ -236,6 +241,8 @@
 
   // Init
   if('scrollRestoration' in history){ try{ history.scrollRestoration='manual'; }catch(e){} }
+  // Disable Mermaid's built-in auto-run immediately so it never races our explicit, themed render.
+  if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
   initMermaidSources();
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
   (function(){ var h=(location.hash||'').replace(/^#p-/,'').replace(/^#/,''); var ids=_panels.map(function(p){return p.id;});

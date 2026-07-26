@@ -60,6 +60,8 @@
 <script>
   const host = document.getElementById('diagram');
   const SRC = host.textContent;          // capture raw source before Mermaid processes it
+  // Disable Mermaid's built-in auto-run immediately so it never races our explicit, themed render.
+  if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
 
   // Mermaid theme variables tuned to the plugin palette (base theme, light + dark).
   function mmVars(dark){ return dark ? {

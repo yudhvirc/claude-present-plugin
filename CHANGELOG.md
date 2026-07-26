@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ## [1.1.2] — 2026-07-25
 
 ### Fixed
+- **Intermittent "Syntax error in text" on Mermaid diagrams (cleared on refresh).** Mermaid's built-in auto-run was racing the template's own explicit themed render — two overlapping `mermaid.run()` calls corrupt its shared state and one diagram renders as a parse-error stub. Now every template disables Mermaid auto-run immediately (before it can fire) and serializes renders through a promise chain so calls never overlap. Affects `slides.html`, `page.html`, `report.html`, `diagram.html`.
 - **Broken light mode + Mermaid diagrams in `page.html` and `slides.html`.** Both templates had the `{{LIB}}` placeholder a second time *inside a `//` JavaScript comment*, so inlining the bundled library (a global `{{LIB}}` replace) pasted ~3 MB of Mermaid into that comment — a syntax error that killed the whole `<script>`. Result: the theme toggle stopped working (light mode dead) and diagrams rendered with ugly defaults / as raw text. Each template now has exactly one `{{LIB}}` slot.
 - **Tiny Mermaid diagrams on slides.** A diagram on a slide rendered at its small intrinsic size (Mermaid's `useMaxWidth` caps the SVG), leaving a postage-stamp diagram floating in a huge empty slide. Slide diagrams now scale up to fill the slide (up to `min(92vw, 1250px)` × 60vh, aspect-ratio preserved and centered), with less height reserved when the slide also has a heading, and are hidden in the overview grid like charts.
 

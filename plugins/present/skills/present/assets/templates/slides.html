@@ -164,6 +164,10 @@
   const notes = document.getElementById('notes');
   let i = 0, overview = false, notesOn = false;
 
+  // Disable Mermaid's built-in auto-run IMMEDIATELY (before it fires) so it never races our explicit,
+  // themed render — that race is what makes a diagram intermittently show "Syntax error in text" until refresh.
+  if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
+
   // Wrap each slide's content in a .fit box we can scale to fill the frame.
   slides.forEach(function(s){
     if(s.querySelector(':scope > .fit')) return;
@@ -252,13 +256,18 @@
     lineColor:'#64748b', secondaryColor:'#f1f5f9', tertiaryColor:'#f1f5f9',
     clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff'
   }; }
-  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
-    var dark = document.documentElement.getAttribute('data-theme')==='dark';
-    mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
-      flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
-    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-    try{ var p = mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) });
-         if(p && p.then) p.then(fitActive, fitActive); else fitActive(); }catch(e){ fitActive(); } }
+  var _rendering = null;
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return _rendering || Promise.resolve();
+    // Serialize: chain each render off the previous so two mermaid.run() calls never overlap (overlap
+    // corrupts Mermaid's shared state → intermittent "Syntax error in text" that clears on refresh).
+    _rendering = Promise.resolve(_rendering).catch(function(){}).then(function(){
+      var dark = document.documentElement.getAttribute('data-theme')==='dark';
+      mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
+        flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
+      _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+      return mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) });
+    }).then(fitActive, fitActive);
+    return _rendering; }
 
   // PDF export via the browser's print dialog ("Save as PDF"). Fully offline.
   // Set PRINT_NOTES=true to also print each slide's speaker notes beneath it.
