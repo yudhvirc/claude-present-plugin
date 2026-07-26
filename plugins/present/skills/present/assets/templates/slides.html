@@ -21,9 +21,14 @@
   .deck { position:fixed; inset:0; }
   .slide { position:absolute; inset:0; display:none; flex-direction:column;
            justify-content:center; align-items:center; text-align:center;
-           gap:clamp(.6rem, 3.2vh, 2.2rem); padding:6vh 7vw; animation:fade .35s ease; }
+           padding:2.5vh 3vw; overflow:hidden; animation:fade .35s ease; }
   .slide.active { display:flex; }
   @keyframes fade { from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+  /* Auto-fit wrapper: JS scales this so each slide's content fills the frame (max readable size, never
+     clipping). transform doesn't affect layout, so the flex centering still holds. */
+  .fit { display:flex; flex-direction:column; align-items:center; justify-content:center;
+         gap:clamp(.6rem, 3.2vh, 2.2rem); transform-origin:center center; will-change:transform; }
+  .deck.overview .fit { transform:none !important; }   /* overview cells use their own sizing */
   /* Presentation-scale type: big enough to fill a 16:9 screen and read from across a room. A shared, wide
      content column + generous line/bullet spacing makes the content occupy the slide instead of clustering
      small in the middle with dead space above and below. */
@@ -152,10 +157,34 @@
   const notes = document.getElementById('notes');
   let i = 0, overview = false, notesOn = false;
 
+  // Wrap each slide's content in a .fit box we can scale to fill the frame.
+  slides.forEach(function(s){
+    if(s.querySelector(':scope > .fit')) return;
+    const fit = document.createElement('div'); fit.className = 'fit';
+    while(s.firstChild) fit.appendChild(s.firstChild);
+    s.appendChild(fit);
+  });
+  // Scale a slide's content to fill ~94% of the frame (min of the two axes → never overflows),
+  // clamped so a single word doesn't balloon and an overfull slide shrinks to fit instead of clipping.
+  function fitSlide(s){
+    const fit = s.querySelector(':scope > .fit'); if(!fit) return;
+    fit.style.transform = 'none';
+    if(!s.clientWidth || !s.clientHeight) return;         // hidden slide — can't measure
+    const w = fit.scrollWidth, h = fit.scrollHeight; if(!w || !h) return;
+    let k = Math.min(s.clientWidth * 0.94 / w, s.clientHeight * 0.94 / h);
+    k = Math.max(0.4, Math.min(k, 2.6));
+    fit.style.transform = 'scale(' + k + ')';
+  }
+  function fitActive(){ requestAnimationFrame(function(){ fitSlide(slides[i]); }); }
+  window.addEventListener('resize', function(){
+    if(document.body.classList.contains('printing')) slides.forEach(fitSlide); else fitActive();
+  });
+
   function render(){
     slides.forEach((s,n)=> s.classList.toggle('active', n===i));
     counter.textContent = (i+1) + ' / ' + slides.length;
     progress.style.width = ((i+1)/slides.length*100) + '%';
+    fitActive();
     const n = slides[i].getAttribute('data-notes') || '';
     notes.innerHTML = '<b>Slide ' + (i+1) + ' notes:</b> ' + (n || '—');
     location.hash = '#' + (i+1);
@@ -221,7 +250,8 @@
     mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
       flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
     _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-    try{ mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) }); }catch(e){} }
+    try{ var p = mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) });
+         if(p && p.then) p.then(fitActive, fitActive); else fitActive(); }catch(e){ fitActive(); } }
 
   // PDF export via the browser's print dialog ("Save as PDF"). Fully offline.
   // Set PRINT_NOTES=true to also print each slide's speaker notes beneath it.
@@ -235,6 +265,7 @@
     if(PRINT_NOTES) document.body.classList.add('print-notes');
     void document.body.offsetHeight;      // force reflow so canvases pick up print layout
     eachChart(c=> c.resize());
+    slides.forEach(fitSlide);             // every slide is visible when printing — fit each
   });
   window.addEventListener('afterprint', function(){
     document.body.classList.remove('printing','print-notes');
@@ -255,6 +286,11 @@
   // Capture any Mermaid sources, then apply saved/initial theme (renders diagrams + sets Chart.js defaults).
   initMermaidSources();
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
+
+  // Re-fit once web/system fonts and the full page have settled (text metrics change the content size).
+  fitActive();
+  window.addEventListener('load', fitActive);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitActive); }
 
   // CHART_INIT placeholder below: build any per-slide charts here using Chart.js. Don't hardcode
   // tick/grid colors — leave them out so they follow the theme via Chart.defaults.

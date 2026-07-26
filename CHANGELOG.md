@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - **Tiny Mermaid diagrams on slides.** A diagram on a slide rendered at its small intrinsic size (Mermaid's `useMaxWidth` caps the SVG), leaving a postage-stamp diagram floating in a huge empty slide. Slide diagrams now scale up to fill the slide (up to `min(92vw, 1250px)` × 60vh, aspect-ratio preserved and centered), with less height reserved when the slide also has a heading, and are hidden in the overview grid like charts.
 
 ### Changed
-- **Slides use the space better.** Presentation-scale typography — larger headings and body/bullet type (`h2` up to 3.6rem, body up to 2.1rem) so content reads across a room instead of clustering small in the middle — plus a shared content column (`min(1180px, 88vw)`), roomier bullet spacing, accent-colored list markers, and larger on-slide charts.
+- **Slides now auto-fit to fill the frame.** Each slide's content is scaled to fill ~94% of the slide (the smaller of the two axes, so it never overflows), with presentation-scale typography, a wide content column, roomier bullet spacing and accent markers. Short slides fill the space at large readable type instead of clustering small in the middle; overly full slides shrink to fit instead of clipping. Re-fits on navigation, resize, theme toggle, font load, diagram render, and for print.
 
 ### Added (validation — this class of failure can no longer ship silently)
 - **`build.js` now refuses** a template with a duplicate `{{LIB}}` slot, and its validator (`--check`, run on every output) errors on: a library inlined **inside a `//` comment**, and a `<pre class="mermaid">` diagram with **no Mermaid library inlined** (would render as raw text).
