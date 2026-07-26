@@ -3,7 +3,7 @@
 All notable changes to the **present** plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.1.0] — 2026-07-25
+## [1.1.1] — 2026-07-25
 
 ### Added
 - **Mobile-responsive output** — every template (chart, diagram, slides, page, report) now ships mobile media queries: fluid `clamp()` type, grids that collapse (KPIs/cards stack), report tabs that scroll horizontally, tables/diagrams that scroll instead of overflowing, a repositioned toolbar, and (for slides) a hidden keyboard-hint bar on touch with a compact HUD.
@@ -46,5 +46,5 @@ First stable release. `present` turns data, code, logs, or plain instructions in
 /reload-plugins
 ```
 
-[1.1.0]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.1.0
+[1.1.1]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.1.1
 [1.0.0]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.0.0
