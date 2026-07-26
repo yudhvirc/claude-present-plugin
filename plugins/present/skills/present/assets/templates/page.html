@@ -5,53 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
 <style>
-  /* General self-contained HTML page — landing pages, reports, documents, dashboards.
-     Theme-aware (light/dark toggle) + PDF export, same as the other templates. */
+  /* General self-contained HTML page — landing pages, one-pagers, documents, dashboards.
+     Premium-but-professional defaults; theme-aware (light/dark) + PDF export. */
   :root, html[data-theme="dark"] {
-    --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --border:#334155; --accent:#38bdf8; --link:#7dd3fc;
+    --bg:#0b1220; --panel:#141f33; --elev:#1b2740; --ink:#e9eef7; --muted:#94a5be; --border:#243149;
+    --accent:#38bdf8; --accent2:#818cf8; --link:#7dd3fc;
+    --tint1:rgba(56,189,248,.12); --tint1e:rgba(56,189,248,0); --tint2:rgba(129,140,248,.10); --tint2e:rgba(129,140,248,0); --hover-bd:#33507d; --row:rgba(56,189,248,.06);
+    --shadow:0 16px 40px -20px rgba(0,0,0,.65); --ring:rgba(56,189,248,.35);
   }
   html[data-theme="light"] {
-    --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#475569; --border:#e2e8f0; --accent:#0284c7; --link:#0369a1;
+    --bg:#f5f7fb; --panel:#ffffff; --elev:#f7f9fc; --ink:#0f1b2e; --muted:#4a5a72; --border:#e6ebf3;
+    --accent:#0284c7; --accent2:#4f46e5; --link:#0369a1;
+    --tint1:rgba(2,132,199,.07); --tint1e:rgba(2,132,199,0); --tint2:rgba(79,70,229,.05); --tint2e:rgba(79,70,229,0); --hover-bd:#a7cdea; --row:rgba(2,132,199,.05);
+    --shadow:0 18px 44px -22px rgba(15,23,42,.22); --ring:rgba(2,132,199,.28);
   }
-  /* Fonts — theme-independent. Default = system stack (output unchanged unless a preset is chosen).
-     For an aesthetic direction, override these two with an OFFLINE system-font preset
-     (see references/authoring.md -> "Visual polish"). Never load fonts over the network. */
+  /* Fonts — theme-independent. Default = system stack. Override for an aesthetic direction with an
+     OFFLINE system-font preset (see references/authoring.md -> "Visual polish"); never load fonts over the network. */
   :root { --display-font: system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
           --body-font:    system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); transition:background .2s,color .2s;
-         font-family: var(--body-font); line-height:1.65; }
-  .container { max-width:860px; margin:0 auto; padding:48px 24px 96px; }
-  h1 { font-size:2.2rem; line-height:1.15; margin:0 0 .4em; font-family: var(--display-font); }
-  h2 { font-size:1.5rem; margin:2em 0 .5em; border-bottom:1px solid var(--border); padding-bottom:.25em; font-family: var(--display-font); }
-  h3 { font-size:1.15rem; margin:1.6em 0 .4em; font-family: var(--display-font); }
+  body { margin:0; color:var(--ink); font-family:var(--body-font); line-height:1.7; letter-spacing:.1px;
+         -webkit-font-smoothing:antialiased; transition:background .25s,color .25s;
+         background:radial-gradient(1100px 520px at 12% -8%, var(--tint1), var(--tint1e) 60%),
+                    radial-gradient(1000px 520px at 100% -5%, var(--tint2), var(--tint2e) 55%),
+                    var(--bg); background-attachment:fixed; }
+  .container { max-width:880px; margin:0 auto; padding:56px 24px 100px; }
+  h1 { font-family:var(--display-font); font-size:2.6rem; line-height:1.1; letter-spacing:-.02em; font-weight:800; margin:0 0 .35em; color:var(--ink); }
+  @supports ((-webkit-background-clip:text) or (background-clip:text)) {
+    h1 { background:linear-gradient(120deg, var(--ink) 30%, var(--accent)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  }
+  h2 { font-family:var(--display-font); font-size:1.6rem; font-weight:700; letter-spacing:-.01em; margin:2.2em 0 .6em; padding-bottom:.3em; border-bottom:1px solid var(--border); }
+  h3 { font-family:var(--display-font); font-size:1.15rem; font-weight:700; margin:1.7em 0 .4em; }
   p, li { color:var(--ink); }
-  a { color:var(--link); }
-  .lead { font-size:1.2rem; color:var(--muted); }
+  a { color:var(--link); text-underline-offset:3px; }
+  .lead { font-size:1.25rem; line-height:1.6; color:var(--muted); max-width:62ch; }
   .muted { color:var(--muted); }
-  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin:16px 0; }
-  .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
-  .badge { display:inline-block; background:var(--accent); color:#04212e; border-radius:999px; padding:2px 12px; font-size:.8rem; font-weight:600; }
-  table { width:100%; border-collapse:collapse; margin:16px 0; }
-  th, td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
-  th { background:var(--panel); }
-  code, pre { background:var(--panel); border:1px solid var(--border); border-radius:8px; }
-  code { padding:.1em .4em; } pre { padding:14px 16px; overflow:auto; }
-  hr { border:0; border-top:1px solid var(--border); margin:2em 0; }
-  .btn { display:inline-block; background:var(--accent); color:#04212e; text-decoration:none; font-weight:600;
-         border-radius:10px; padding:10px 18px; margin:6px 8px 6px 0; }
-  .chart-wrap { position:relative; height:340px; margin:16px 0; }
-
+  .card { position:relative; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px 24px; margin:18px 0;
+          box-shadow:var(--shadow); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .card:hover { transform:translateY(-2px); border-color:var(--hover-bd); }
+  .grid { display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .grid > .card { margin:0; }
+  .badge { display:inline-block; background:linear-gradient(120deg,var(--accent),var(--accent2)); color:#fff; border-radius:999px;
+           padding:4px 14px; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 8px 20px -10px var(--ring); }
+  table { width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  th, td { padding:11px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:var(--elev); font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  tr:last-child td { border-bottom:0; }
+  tbody tr:hover td { background:var(--row); }
+  code, pre { background:var(--elev); border:1px solid var(--border); border-radius:10px; }
+  code { padding:.12em .45em; font-size:.92em; } pre { padding:16px 18px; overflow:auto; }
+  hr { border:0; height:1px; background:linear-gradient(90deg, transparent, var(--border), transparent); margin:2.4em 0; }
+  .btn { display:inline-flex; align-items:center; gap:.5em; background:linear-gradient(120deg,var(--accent),var(--accent2)); color:#fff;
+         text-decoration:none; font-weight:650; border-radius:12px; padding:11px 20px; margin:6px 10px 6px 0;
+         box-shadow:0 12px 26px -12px var(--ring); transition:transform .15s, box-shadow .15s; }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 16px 32px -12px var(--ring); }
+  .chart-wrap { position:relative; height:340px; margin:18px 0; }
   .toolbar { position:fixed; top:16px; right:18px; display:flex; gap:8px; z-index:50; }
-  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:8px;
-                    padding:6px 12px; font-size:.85rem; cursor:pointer; }
-  .toolbar button:hover { border-color:var(--accent); }
+  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:10px; padding:7px 13px;
+                    font-size:.85rem; cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s,transform .15s; }
+  .toolbar button:hover { border-color:var(--accent); transform:translateY(-1px); }
   @media print {
     @page { margin: 16mm; }
     body { background:#fff; }
     .toolbar { display:none !important; }
     .container { max-width:none; padding:0; }
-    .card, pre, table, .chart-wrap { break-inside:avoid; }
+    .card, pre, table, .chart-wrap { break-inside:avoid; box-shadow:none; }
+    h1 { -webkit-text-fill-color:var(--ink); color:var(--ink); }
   }
 </style>
 </head>

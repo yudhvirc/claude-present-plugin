@@ -5,64 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
 <style>
-  /* Single-page interactive REPORT — tabbed sections + hover tooltips. Offline, theme + PDF. */
+  /* Single-page interactive REPORT — tabbed sections + hover tooltips. Premium, offline, theme + PDF. */
   :root, html[data-theme="dark"] {
-    --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --border:#334155; --accent:#38bdf8; --link:#7dd3fc; --tabbg:#0b1120;
+    --bg:#0b1220; --panel:#141f33; --elev:#1b2740; --ink:#e9eef7; --muted:#94a5be; --border:#243149;
+    --accent:#38bdf8; --accent2:#818cf8; --link:#7dd3fc; --tabbg:#0e1728;
+    --tint1:rgba(56,189,248,.12); --tint1e:rgba(56,189,248,0); --tint2:rgba(129,140,248,.10); --tint2e:rgba(129,140,248,0); --hover-bd:#33507d; --row:rgba(56,189,248,.06);
+    --shadow:0 16px 40px -20px rgba(0,0,0,.65); --ring:rgba(56,189,248,.35);
   }
   html[data-theme="light"] {
-    --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#475569; --border:#e2e8f0; --accent:#0284c7; --link:#0369a1; --tabbg:#eef2f7;
+    --bg:#f5f7fb; --panel:#ffffff; --elev:#f7f9fc; --ink:#0f1b2e; --muted:#4a5a72; --border:#e6ebf3;
+    --accent:#0284c7; --accent2:#4f46e5; --link:#0369a1; --tabbg:#eef2f8;
+    --tint1:rgba(2,132,199,.07); --tint1e:rgba(2,132,199,0); --tint2:rgba(79,70,229,.05); --tint2e:rgba(79,70,229,0); --hover-bd:#a7cdea; --row:rgba(2,132,199,.05);
+    --shadow:0 18px 44px -22px rgba(15,23,42,.22); --ring:rgba(2,132,199,.28);
   }
   :root { --display-font: system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
           --body-font:    system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--body-font); line-height:1.6;
-         transition:background .2s,color .2s; }
-  .wrap { max-width:1080px; margin:0 auto; padding:40px 24px 80px; }
-  header h1 { font-family:var(--display-font); font-size:2rem; line-height:1.15; margin:0 0 .2em; }
-  header .sub { color:var(--muted); font-size:1.1rem; margin:0 0 20px; }
-  h2 { font-family:var(--display-font); font-size:1.35rem; margin:0 0 .6em; }
-  h3 { font-size:1.05rem; margin:1.4em 0 .4em; }
-  a { color:var(--link); }
+  body { margin:0; color:var(--ink); font-family:var(--body-font); line-height:1.65; letter-spacing:.1px;
+         -webkit-font-smoothing:antialiased; transition:background .25s,color .25s;
+         background:radial-gradient(1100px 520px at 12% -8%, var(--tint1), var(--tint1e) 60%),
+                    radial-gradient(1000px 520px at 100% -5%, var(--tint2), var(--tint2e) 55%),
+                    var(--bg); background-attachment:fixed; }
+  .wrap { max-width:1080px; margin:0 auto; padding:48px 24px 80px; }
+  header h1 { font-family:var(--display-font); font-size:2.3rem; line-height:1.1; letter-spacing:-.02em; font-weight:800; margin:0 0 .15em; color:var(--ink); }
+  header .sub { color:var(--muted); font-size:1.12rem; margin:0 0 22px; }
+  h2 { font-family:var(--display-font); font-size:1.4rem; font-weight:700; letter-spacing:-.01em; margin:0 0 .6em; }
+  h3 { font-family:var(--display-font); font-size:1.05rem; font-weight:700; margin:1.4em 0 .4em; }
+  a { color:var(--link); text-underline-offset:3px; }
   .muted { color:var(--muted); }
 
   /* Tabs */
-  .tabs { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; gap:4px; padding:8px 0;
-          background:var(--bg); border-bottom:1px solid var(--border); margin-bottom:24px; }
-  .tab { appearance:none; background:transparent; color:var(--muted); border:0; border-radius:8px 8px 0 0;
-         padding:10px 16px; font-size:.95rem; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; }
+  .tabs { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; gap:6px; padding:10px 0;
+          background:var(--bg); border-bottom:1px solid var(--border); margin-bottom:26px; }
+  .tab { appearance:none; background:transparent; color:var(--muted); border:0; border-radius:10px;
+         padding:9px 16px; font-size:.95rem; font-weight:650; cursor:pointer; transition:background .15s,color .15s; }
   .tab:hover { color:var(--ink); background:var(--tabbg); }
-  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-  .panel { display:none; animation:fade .25s ease; }
+  .tab.active { color:#fff; background:linear-gradient(120deg,var(--accent),var(--accent2)); box-shadow:0 8px 20px -10px var(--ring); }
+  .panel { display:none; animation:fade .28s ease; }
   .panel.active { display:block; }
   @keyframes fade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
   .panel-title { display:none; }   /* shown only in print */
 
   /* Content blocks */
-  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin:14px 0; }
-  .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
-  .kpi { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
-  .kpi .n { font-family:var(--display-font); font-size:1.8rem; font-weight:700; }
-  .kpi .l { color:var(--muted); font-size:.85rem; }
-  table { width:100%; border-collapse:collapse; margin:14px 0; }
-  th, td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
-  th { background:var(--panel); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px 22px; margin:16px 0;
+          box-shadow:var(--shadow); transition:transform .18s,border-color .18s; }
+  .card:hover { transform:translateY(-2px); border-color:var(--hover-bd); }
+  .grid { display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .kpi { position:relative; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 20px 18px 22px;
+         box-shadow:var(--shadow); overflow:hidden; transition:transform .18s,border-color .18s; }
+  .kpi::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--accent),var(--accent2)); }
+  .kpi:hover { transform:translateY(-2px); border-color:var(--hover-bd); }
+  .kpi .n { font-family:var(--display-font); font-size:2rem; font-weight:800; letter-spacing:-.02em; color:var(--ink); }
+  .kpi .l { color:var(--muted); font-size:.85rem; margin-top:2px; }
+  table { width:100%; border-collapse:separate; border-spacing:0; margin:16px 0; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  th, td { padding:11px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:var(--elev); font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  tr:last-child td { border-bottom:0; } tbody tr:hover td { background:var(--row); }
   .chart-wrap { position:relative; height:340px; margin:8px 0; }
-  .badge { display:inline-block; background:var(--accent); color:#04212e; border-radius:999px; padding:2px 12px; font-size:.78rem; font-weight:700; }
+  .badge { display:inline-block; background:linear-gradient(120deg,var(--accent),var(--accent2)); color:#fff; border-radius:999px;
+           padding:4px 14px; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 8px 20px -10px var(--ring); }
+
+  /* Gradient headline + KPI numbers, only where background-clip:text is supported (falls back to solid --ink). */
+  @supports ((-webkit-background-clip:text) or (background-clip:text)) {
+    header h1, .kpi .n { background:linear-gradient(120deg,var(--ink) 25%,var(--accent)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  }
 
   /* Tooltip — pure CSS, offline. Use <span class="tip" data-tip="explanation">term</span> */
   .tip { position:relative; border-bottom:1px dotted var(--muted); cursor:help; }
   .tip:hover::after, .tip:focus::after { content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 8px);
-    transform:translateX(-50%); background:var(--panel); color:var(--ink); border:1px solid var(--border);
-    border-radius:8px; padding:8px 11px; width:max-content; max-width:280px; white-space:normal; font-size:.82rem;
-    font-weight:400; line-height:1.4; z-index:60; box-shadow:0 8px 28px rgba(0,0,0,.35); }
+    transform:translateX(-50%); background:var(--elev); color:var(--ink); border:1px solid var(--border);
+    border-radius:10px; padding:9px 12px; width:max-content; max-width:280px; white-space:normal; font-size:.82rem;
+    font-weight:400; line-height:1.45; z-index:60; box-shadow:0 12px 30px -8px rgba(0,0,0,.4); }
   .tip:hover::before, .tip:focus::before { content:""; position:absolute; left:50%; bottom:calc(100% + 2px);
     transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--border); z-index:60; }
 
   .toolbar { position:fixed; top:16px; right:18px; display:flex; gap:8px; z-index:50; }
-  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:8px;
-                    padding:6px 12px; font-size:.85rem; cursor:pointer; }
-  .toolbar button:hover { border-color:var(--accent); }
-  footer { color:var(--muted); font-size:.8rem; margin-top:32px; }
+  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:10px;
+                    padding:7px 13px; font-size:.85rem; cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s,transform .15s; }
+  .toolbar button:hover { border-color:var(--accent); transform:translateY(-1px); }
+  footer { color:var(--muted); font-size:.8rem; margin-top:36px; }
 
   /* Print / PDF: show ALL tabs' content, each with its title; hide chrome. */
   body.printing .tabs { display:none; }
@@ -74,7 +95,8 @@
     .toolbar, .tabs { display:none !important; }
     .panel { display:block !important; }
     .panel-title { display:block; }
-    .card, table, .chart-wrap, .kpi { break-inside:avoid; }
+    .card, table, .chart-wrap, .kpi { break-inside:avoid; box-shadow:none; }
+    header h1, .kpi .n { -webkit-text-fill-color:var(--ink); color:var(--ink); }
   }
 </style>
 </head>
