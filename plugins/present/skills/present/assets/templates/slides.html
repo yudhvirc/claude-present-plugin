@@ -31,6 +31,14 @@
   .slide .chart-wrap { position:relative; width:min(70vw,900px); height:52vh; }
   .slide.title { background:linear-gradient(135deg,#0f172a,#1e3a5f); }
 
+  /* Mermaid diagrams: scale UP to fill the slide (Mermaid's useMaxWidth caps the SVG at its tiny intrinsic
+     size, so without this a diagram renders as a small blob in a huge empty slide). The SVG has a viewBox and
+     preserves aspect ratio, so forcing it to the box scales it uniformly and centers it. */
+  .slide .mermaid { margin:.4em 0 0; width:min(92vw,1250px); height:60vh; display:flex; align-items:center;
+                    justify-content:center; overflow:hidden; background:none; border:0; padding:0; }
+  .slide .mermaid svg { max-width:none !important; width:100% !important; height:100% !important; }
+  .slide h2 + .mermaid { height:56vh; }   /* leave room when the slide also has a heading */
+
   /* Chrome */
   .bar { position:fixed; left:0; right:0; bottom:0; height:5px; background:#1e293b; z-index:20; }
   .bar > span { display:block; height:100%; width:0; background:var(--accent); transition:width .3s; }
@@ -56,7 +64,7 @@
   .deck.overview .slide h1 { font-size:1.6vw; } .deck.overview .slide h2 { font-size:1.3vw; }
   .deck.overview .slide p, .deck.overview .slide li { font-size:1vw; }
   .deck.overview .slide:hover { border-color:var(--accent); }
-  .deck.overview .chart-wrap { display:none; }
+  .deck.overview .chart-wrap, .deck.overview .mermaid { display:none; }
 
   /* Print / PDF export: reveal every slide, one per page, hide the chrome.
      `.printing` mirrors the print layout on screen so Chart.js canvases re-rasterize at the right size. */
