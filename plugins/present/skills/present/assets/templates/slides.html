@@ -183,7 +183,7 @@
     applyChartDefaults(); eachChart(c=> c.update()); renderMermaid(); }
   function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
 
-  // Mermaid diagrams on slides stay theme-synced. Inline Mermaid in {{LIB}} and put a
+  // Mermaid diagrams on slides stay theme-synced. Inline Mermaid at the library slot above and put a
   // <pre class="mermaid">…source…</pre> on a slide — the deck renders it and re-themes it automatically.
   var _mmd = [];
   function initMermaidSources(){ if(typeof mermaid==='undefined') return;
