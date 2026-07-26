@@ -73,7 +73,9 @@ function libBlock(libs, cdn) {
 function validate(html, opts) {
   opts = opts || {};
   const errs = [], warns = [];
-  const skel = html.replace(/<script(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/g, '<script></script>');
+  const skel = html
+    .replace(/<script(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/g, '<script></script>')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '<style></style>');   // CSS comments can mention "<html>/<body>" — don't let them skew structural counts
   const n = (re, s) => ((s || skel).match(re) || []).length;
 
   if (n(/<!DOCTYPE html>/gi) !== 1) errs.push(`expected exactly 1 <!DOCTYPE>, found ${n(/<!DOCTYPE html>/gi)} — content is duplicated`);
@@ -103,9 +105,20 @@ function validate(html, opts) {
     if (noTab.length) warns.push(`panels with no tab: ${noTab.join(', ')}`);
   }
 
-  // Mermaid used but not inlined/loaded?
-  if (/<pre class="mermaid"/.test(html) && !/mermaid\.(min\.)?js|cdn.*mermaid|function\(JM/i.test(html)) {
-    warns.push('a <pre class="mermaid"> is present but the Mermaid library is not inlined — pass --libs mermaid');
+  // Mermaid used but not inlined/loaded? A <pre class="mermaid"> with no library renders as raw text (a
+  // broken-looking diagram). This is an ERROR on the final/checked document; skipped pre-inline (allowLib),
+  // where {{LIB}} is still a placeholder and the library is legitimately not present yet.
+  if (!opts.allowLib && /<pre class="mermaid"/.test(html) && !/mermaid\.(min\.)?js|cdn.*mermaid|function\(JM/i.test(html)) {
+    errs.push('a <pre class="mermaid"> diagram is present but the Mermaid library is not inlined — it will render as raw text. Inline Mermaid (build with --libs mermaid, or add it to the {{LIB}} slot).');
+  }
+
+  // A library inlined INSIDE a JS `//` line comment — the classic "{{LIB}} placeholder duplicated in a
+  // comment" corruption. It breaks the whole <script> (theme toggle stops working, Mermaid never re-themes,
+  // diagrams render with ugly defaults). Detect on the raw text, per line, so `--check` catches hand-built files too.
+  const LIB_SIG = /function\(JM,Ag\)|"object"==typeof exports|\(function\s*\(global\s*,\s*factory\)|sourceMappingURL=/;
+  if (html.split('\n').some(l => /^\s*\/\//.test(l) && /<script\b/.test(l) && LIB_SIG.test(l))) {
+    errs.push('a library is inlined inside a `//` JS comment — a {{LIB}} placeholder was duplicated (usually inside a comment). ' +
+              'This breaks the theme toggle and Mermaid diagrams. Each template must have exactly one {{LIB}} slot; regenerate.');
   }
   return { errs, warns, canvases: canvases.length, panels: panelIds.length };
 }
@@ -140,6 +153,14 @@ function main() {
   html = html.replace(/\{\{(?!LIB\}\})[A-Z_]+\}\}/g, '');
   // 4) validate BEFORE inlining libraries (skeleton is clean; errors are readable). {{LIB}} is expected here.
   if (!report(validate(html, { allowLib: true }), 'pre-inline')) { console.error('Refusing to write a broken file.'); process.exit(1); }
+  // 4b) guard: {{LIB}} must appear exactly once. A second slot (often hiding in a // JS comment) would get the
+  //     library inlined into it, corrupting the script — this is the bug that broke light mode + diagrams. Refuse.
+  const libSlots = (html.match(/\{\{LIB\}\}/g) || []).length;
+  if (libSlots > 1) {
+    console.error(`FAIL: template has ${libSlots} {{LIB}} placeholders; expected exactly 1. A duplicate (often inside a ` +
+                  `// comment) will corrupt the inlined library and break the theme toggle + Mermaid. Fix the template.`);
+    process.exit(1);
+  }
   // 5) inline libraries LAST (or CDN)
   html = html.split('{{LIB}}').join(libBlock(o.libs, o.cdn));
   // 6) final validation on the assembled document

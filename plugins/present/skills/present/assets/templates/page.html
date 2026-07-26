@@ -115,7 +115,7 @@
     applyChartDefaults(); eachChart(c=> c.update()); renderMermaid(); }
   function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
 
-  // Mermaid diagrams stay theme-synced. Add a diagram by inlining Mermaid in {{LIB}} and dropping a
+  // Mermaid diagrams stay theme-synced. Add a diagram by inlining Mermaid at the library slot above and dropping a
   // <pre class="mermaid">…source…</pre> into the content — the template renders it and re-themes it. No manual init needed.
   var _mmd = [];
   function initMermaidSources(){ if(typeof mermaid==='undefined') return;

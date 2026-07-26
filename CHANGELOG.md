@@ -3,6 +3,15 @@
 All notable changes to the **present** plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] — 2026-07-25
+
+### Fixed
+- **Broken light mode + Mermaid diagrams in `page.html` and `slides.html`.** Both templates had the `{{LIB}}` placeholder a second time *inside a `//` JavaScript comment*, so inlining the bundled library (a global `{{LIB}}` replace) pasted ~3 MB of Mermaid into that comment — a syntax error that killed the whole `<script>`. Result: the theme toggle stopped working (light mode dead) and diagrams rendered with ugly defaults / as raw text. Each template now has exactly one `{{LIB}}` slot.
+
+### Added (validation — this class of failure can no longer ship silently)
+- **`build.js` now refuses** a template with a duplicate `{{LIB}}` slot, and its validator (`--check`, run on every output) errors on: a library inlined **inside a `//` comment**, and a `<pre class="mermaid">` diagram with **no Mermaid library inlined** (would render as raw text).
+- Fixed a validator false-positive: `<html>`/`<body>` mentioned inside CSS comments no longer skews the structural duplicate-document counts (`<style>` bodies are now neutralized alongside `<script>` bodies).
+
 ## [1.1.1] — 2026-07-25
 
 ### Added

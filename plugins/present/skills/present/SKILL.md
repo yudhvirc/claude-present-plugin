@@ -64,9 +64,9 @@ Never run a broad regex (comment strip, leftover-`{{…}}` cleanup, minifier) ac
 # content.json keys are placeholder names without braces: TITLE, SUBTITLE, TABS, PANELS, SCRIPT, CONTENT, SLIDES, …
 node "<skill>/assets/scripts/build.js" --template report --content content.json --out present-output/<slug>/index.html --libs chart,mermaid
 ```
-It **refuses to write a broken file** (fails on duplicated structure, leftover placeholders, tab/panel-id mismatch, or a `<canvas>` with no `new Chart`).
+It **refuses to write a broken file** (fails on duplicated structure, leftover placeholders, tab/panel-id mismatch, a `<canvas>` with no `new Chart`, a library inlined **inside a `//` comment** — which silently kills the theme toggle and Mermaid — or a `<pre class="mermaid">` with **no Mermaid library inlined**).
 
-**Validate every generated HTML before delivering:** `node "<skill>/assets/scripts/build.js" --check <file>` — it flags duplicated documents, unfilled `{{…}}`, canvases without a chart, and mismatched tabs/panels. Fix any failure; never hand a file to the user that doesn't pass.
+**Validate every generated HTML before delivering — no exceptions, however you built it (build script *or* by hand):** `node "<skill>/assets/scripts/build.js" --check <file>`. It flags duplicated documents, unfilled `{{…}}`, canvases without a chart, mismatched tabs/panels, a library mis-inlined into a JS comment, and a Mermaid diagram with no library. These are exactly the defects that make light mode stop working and diagrams render as raw/ugly text. Fix any failure; **never hand a file to the user that doesn't pass `--check`.**
 
 **Every template ships two built-in controls — no wiring needed:**
 - **Light/dark theme toggle** (☀/☾ button, `T` key in slides), persisted in `localStorage`. Colors come from CSS variables; charts follow the theme via `Chart.defaults`, and diagrams re-render with Mermaid's matching theme. So in `chart.html`/slides, **don't hardcode tick/grid colors** in chart configs — omit them and they follow the theme.
