@@ -1,5 +1,12 @@
 # present — Claude Code plugin
 
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-22C55E.svg"></a>
+  <img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-6E56CF">
+  <img alt="Output: 100% offline" src="https://img.shields.io/badge/output-100%25%20offline-0EA5E9">
+  <img alt="Runtime dependencies: none" src="https://img.shields.io/badge/runtime%20deps-none-16A34A">
+</p>
+
 Turn **data files, code/architecture, logs, or a plain-text description** into a **self-contained HTML visual** — charts, diagrams, a keyboard-navigable PPT-style presentation, or a general HTML page. Local-first: bundles Chart.js + Mermaid so output works fully offline.
 
 ## What it does
@@ -11,7 +18,7 @@ Invoke the skill and describe (or point at) what you want to present:
 - **"Make a deck / slides / presentation"** → a self-contained HTML presentation with arrow-key navigation, Prev/Next buttons, progress bar, fullscreen (F), speaker notes (S), an overview grid (Esc), and charts embedded on slides.
 - **"Build an HTML page/landing page/one-pager about X"** → Claude generates the content from your instructions and renders a general self-contained HTML page (`page.html`) — theme toggle + PDF export included.
 
-Default output is **one self-contained `.html` file**. It also asks about **privacy** (fully-local → libraries are inlined so nothing needs the internet; or CDN if you prefer a smaller file) and can emit **Mermaid text** or **SVG** when you'd rather have those. Every run is written into an organized `present-output/<slug>/` folder (with an `index.html` landing page when there are multiple artifacts).
+Default output is **one self-contained, fully-offline `.html` file** — Chart.js and Mermaid are inlined, so nothing loads from the network. Ask for **CDN** if you'd rather have a smaller file, or for **Mermaid text** / **SVG** when you need those instead. Every run is written into an organized `present-output/<slug>/` folder (with an `index.html` landing page when there are multiple artifacts).
 
 ## Preview
 Real, self-contained, fully-offline HTML output from `/present`:
@@ -25,21 +32,27 @@ Real, self-contained, fully-offline HTML output from `/present`:
 **HTML page** — generated from a one-line instruction
 ![Landing page](docs/screenshot-page.png)
 
-## Installation
+## 🚀 Installation
 
-**Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code). No runtime dependencies — generated HTML opens in any browser, fully offline. (PowerShell *or* Node.js is only needed to read `.xlsx` spreadsheets; both ship with most systems.)
+> **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code) · **zero runtime dependencies** — generated HTML opens in any browser, 100% offline.
 
-### Install from GitHub (recommended)
-In Claude Code, add this repo as a plugin marketplace, then install the plugin:
+**Paste these three lines into Claude Code** — add the marketplace, install, reload:
+
 ```shell
 /plugin marketplace add yudhvirc/claude-present-plugin
 /plugin install present@present
 /reload-plugins
 ```
-`present@present` = plugin **present** from the **present** marketplace. To update later: `/plugin marketplace update present`.
 
-### Team / project install (via settings)
-Commit this to a project's `.claude/settings.json` so everyone working in the repo gets it automatically:
+✅ **That's it.** Run `/plugin list` — you'll see **`present@present`**. Now just ask: _"present sales.csv as a bar chart."_
+
+> 💡 **`present@present`** = plugin **present** from marketplace **present**. Update anytime with `/plugin marketplace update present`.
+
+<details>
+<summary>👥 <b>Team / project install</b> — share with everyone on a repo</summary>
+
+<br>Commit this to the project's `.claude/settings.json`:
+
 ```json
 {
   "extraKnownMarketplaces": {
@@ -48,9 +61,13 @@ Commit this to a project's `.claude/settings.json` so everyone working in the re
   "enabledPlugins": { "present@present": true }
 }
 ```
+</details>
 
-### Developer / local install
-Clone the repo, then add the cloned folder as a marketplace by absolute path:
+<details>
+<summary>🛠️ <b>Developer / local install</b> — from a cloned folder</summary>
+
+<br>
+
 ```bash
 git clone https://github.com/yudhvirc/claude-present-plugin.git
 ```
@@ -59,16 +76,25 @@ git clone https://github.com/yudhvirc/claude-present-plugin.git
 /plugin install present@present
 /reload-plugins
 ```
+</details>
 
-### Verify & manage
+<details>
+<summary>🔎 <b>Verify &amp; manage</b></summary>
+
+<br>
+
 ```shell
 /plugin list               # should list present@present
 /plugin details present
 /plugin disable present    # or: /plugin enable present
 ```
+</details>
 
-### Troubleshooting
-**`Marketplace present not found`** — you must add the marketplace *before* installing (this error means the `add` step didn't register). Run the add first and confirm it appears:
+<details>
+<summary>⚠️ <b>Troubleshooting</b> — "Marketplace present not found"</summary>
+
+<br>You must **add** the marketplace *before* installing (this error means the `add` step never registered). Add it first and confirm it appears:
+
 ```shell
 /plugin marketplace add yudhvirc/claude-present-plugin
 /plugin marketplace list          # should show: present
@@ -79,6 +105,7 @@ If a stale entry is stuck, remove it and re-add:
 /plugin marketplace remove present
 /plugin marketplace add yudhvirc/claude-present-plugin
 ```
+</details>
 
 ## Usage
 The skill **auto-activates** when you ask for something visual — just describe what you want:
@@ -89,7 +116,7 @@ The skill **auto-activates** when you ask for something visual — just describe
 
 You can also invoke it explicitly: `/present:present`.
 
-It will ask about **privacy** (fully-offline with libraries inlined, vs. smaller files via CDN) and **output format** (defaults to self-contained HTML; can also emit Mermaid text or SVG), then write the result into an organized `present-output/<slug>/` folder.
+By default it produces a **fully-offline** self-contained HTML file (Chart.js + Mermaid inlined) and adds diagrams where they aid understanding. It can also emit **Mermaid text** or **SVG**, or use CDN for a smaller file if you ask — then it writes the result into an organized `present-output/<slug>/` folder.
 
 ## Structure
 ```
