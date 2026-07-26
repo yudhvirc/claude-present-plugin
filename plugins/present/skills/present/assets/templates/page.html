@@ -64,6 +64,19 @@
   .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:10px; padding:7px 13px;
                     font-size:.85rem; cursor:pointer; box-shadow:var(--shadow); transition:border-color .15s,transform .15s; }
   .toolbar button:hover { border-color:var(--accent); transform:translateY(-1px); }
+  /* Mobile */
+  @media (max-width: 640px) {
+    body { background-attachment:scroll; }              /* iOS Safari ignores fixed and janks */
+    .container { padding:58px 16px 64px; }              /* leave room for the fixed toolbar */
+    h1 { font-size:1.95rem; }
+    .lead { font-size:1.08rem; }
+    h2 { font-size:1.3rem; }
+    .toolbar { top:10px; right:10px; }
+    .toolbar button { padding:6px 11px; font-size:.8rem; }
+    table { display:block; overflow-x:auto; white-space:nowrap; }   /* wide tables scroll, not overflow */
+    pre { font-size:.8rem; }
+    .grid { grid-template-columns:1fr; }   /* stack cards */
+  }
   @media print {
     @page { margin: 16mm; }
     body { background:#fff; }

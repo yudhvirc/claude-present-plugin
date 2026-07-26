@@ -3,6 +3,12 @@
 All notable changes to the **present** plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-07-25
+
+### Added
+- **Mobile-responsive output** — every template (chart, diagram, slides, page, report) now ships mobile media queries: fluid `clamp()` type, grids that collapse (KPIs/cards stack), report tabs that scroll horizontally, tables/diagrams that scroll instead of overflowing, a repositioned toolbar, and (for slides) a hidden keyboard-hint bar on touch with a compact HUD.
+- **`assets/scripts/build.js`** — a deterministic assembler + validator. Fills a template from a content JSON, inlines the bundled libraries **last**, and refuses to write a broken file. `--check <file>` validates any generated HTML (single document, no leftover `{{…}}`, every `<canvas>` has a `new Chart`, tabs↔panels match). The skill now mandates using it for reports and validating every output — this class of failure (duplicated content, unfilled `{{LIB}}`, empty charts) can no longer ship silently.
+
 ## [1.0.0] — 2026-07-25
 
 First stable release. `present` turns data, code, logs, or plain instructions into self-contained, fully-offline HTML.
@@ -40,4 +46,5 @@ First stable release. `present` turns data, code, logs, or plain instructions in
 /reload-plugins
 ```
 
+[1.1.0]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.1.0
 [1.0.0]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.0.0

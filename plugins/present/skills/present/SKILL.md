@@ -59,9 +59,20 @@ Each placeholder appears **exactly once** in a template (except `{{TITLE}}`, whi
 2. Inline the library into `{{LIB}}` **last**.
 Never run a broad regex (comment strip, leftover-`{{…}}` cleanup, minifier) across the document *after* a library is inlined — it will silently mangle the library. If you must clean up, do it before the final inline step.
 
+**Assemble large/section-heavy outputs with the build script — do NOT hand-paste libraries or hand-duplicate content.** For a **report**, or any output with many sections and inlined libraries, hand-editing the multi-MB file is how you get catastrophic corruption (duplicated content, unfilled `{{LIB}}`, empty canvases). Instead, write the content pieces to a JSON and let `assets/scripts/build.js` assemble deterministically — it fills placeholders, inlines libraries **last**, and validates:
+```bash
+# content.json keys are placeholder names without braces: TITLE, SUBTITLE, TABS, PANELS, SCRIPT, CONTENT, SLIDES, …
+node "<skill>/assets/scripts/build.js" --template report --content content.json --out present-output/<slug>/index.html --libs chart,mermaid
+```
+It **refuses to write a broken file** (fails on duplicated structure, leftover placeholders, tab/panel-id mismatch, or a `<canvas>` with no `new Chart`).
+
+**Validate every generated HTML before delivering:** `node "<skill>/assets/scripts/build.js" --check <file>` — it flags duplicated documents, unfilled `{{…}}`, canvases without a chart, and mismatched tabs/panels. Fix any failure; never hand a file to the user that doesn't pass.
+
 **Every template ships two built-in controls — no wiring needed:**
 - **Light/dark theme toggle** (☀/☾ button, `T` key in slides), persisted in `localStorage`. Colors come from CSS variables; charts follow the theme via `Chart.defaults`, and diagrams re-render with Mermaid's matching theme. So in `chart.html`/slides, **don't hardcode tick/grid colors** in chart configs — omit them and they follow the theme.
 - **PDF export** (⤓ PDF button, `P` key) via the browser's print dialog → "Save as PDF". Chart/diagram pages auto-switch to the light theme for readable paper and restore after; slides print one landscape page each.
+
+**Mobile-responsive out of the box.** Every template has the viewport meta tag and mobile media queries — fluid `clamp()` type, grids that collapse (KPIs/cards stack), report tabs that scroll horizontally, tables/diagrams that scroll instead of overflowing, and a repositioned toolbar. **Keep it responsive:** don't add fixed pixel widths, absolute positioning, or `white-space:nowrap` on prose; use the provided classes (`.grid`, `.card`, `.kpi`, tables) and let them adapt. If you add a wide element (a big table or `<pre>`), wrap it so it scrolls, not overflows.
 
 See `references/authoring.md` for exactly how to fill each placeholder, chart-config recipes, Mermaid diagram-type picking, and slide structure.
 

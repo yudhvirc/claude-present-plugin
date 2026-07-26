@@ -135,6 +135,7 @@ plugins/present/                    The plugin (source: ./plugins/present)
     assets/lib/                     Bundled Chart.js + Mermaid (offline)
     assets/scripts/xlsx-to-json.ps1 Dependency-free .xlsx → JSON/CSV extractor (PowerShell)
     assets/scripts/xlsx-to-json.js  Dependency-free .xlsx → JSON/CSV extractor (Node.js)
+    assets/scripts/build.js         Deterministic assembler + validator (--check) for generated HTML
 examples/                           Sample inputs + generated outputs
 ```
 
