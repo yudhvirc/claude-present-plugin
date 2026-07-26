@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - **Broken light mode + Mermaid diagrams in `page.html` and `slides.html`.** Both templates had the `{{LIB}}` placeholder a second time *inside a `//` JavaScript comment*, so inlining the bundled library (a global `{{LIB}}` replace) pasted ~3 MB of Mermaid into that comment — a syntax error that killed the whole `<script>`. Result: the theme toggle stopped working (light mode dead) and diagrams rendered with ugly defaults / as raw text. Each template now has exactly one `{{LIB}}` slot.
 - **Tiny Mermaid diagrams on slides.** A diagram on a slide rendered at its small intrinsic size (Mermaid's `useMaxWidth` caps the SVG), leaving a postage-stamp diagram floating in a huge empty slide. Slide diagrams now scale up to fill the slide (up to `min(92vw, 1250px)` × 60vh, aspect-ratio preserved and centered), with less height reserved when the slide also has a heading, and are hidden in the overview grid like charts.
 
+### Added
+- **Offline designer-font presets.** `build.js --fonts <preset>` inlines a bundled variable `woff2` as base64 and overrides `--display-font` / `--body-font`, so a deck/page/report uses a polished typeface while staying fully self-contained and offline. Ships the **`fraunces-inter`** preset (elegant Fraunces serif headings + clean Inter body, both SIL OFL). Templates gained a `{{FONTS}}` slot; omit `--fonts` to keep the system stack.
+
 ### Changed
 - **Slides now auto-fit to fill the frame.** Each slide's content is scaled to fill ~94% of the slide (the smaller of the two axes, so it never overflows), with presentation-scale typography, a wide content column, roomier bullet spacing and accent markers. Short slides fill the space at large readable type instead of clustering small in the middle; overly full slides shrink to fit instead of clipping. Re-fits on navigation, resize, theme toggle, font load, diagram render, and for print.
 

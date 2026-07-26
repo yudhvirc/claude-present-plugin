@@ -64,6 +64,7 @@ Never run a broad regex (comment strip, leftover-`{{…}}` cleanup, minifier) ac
 # content.json keys are placeholder names without braces: TITLE, SUBTITLE, TABS, PANELS, SCRIPT, CONTENT, SLIDES, …
 node "<skill>/assets/scripts/build.js" --template report --content content.json --out present-output/<slug>/index.html --libs chart,mermaid
 ```
+**Polished offline fonts (optional):** add `--fonts fraunces-inter` to inline a bundled designer typeface (elegant Fraunces serif headings + clean Inter body) as base64 — stays fully self-contained/offline. Great for decks and pages; omit it to keep the system font stack. (`slides.html`, `page.html`, `report.html` have the `{{FONTS}}` slot.)
 It **refuses to write a broken file** (fails on duplicated structure, leftover placeholders, tab/panel-id mismatch, a `<canvas>` with no `new Chart`, a library inlined **inside a `//` comment** — which silently kills the theme toggle and Mermaid — or a `<pre class="mermaid">` with **no Mermaid library inlined**).
 
 **Validate every generated HTML before delivering — no exceptions, however you built it (build script *or* by hand):** `node "<skill>/assets/scripts/build.js" --check <file>`. It flags duplicated documents, unfilled `{{…}}`, canvases without a chart, mismatched tabs/panels, a library mis-inlined into a JS comment, and a Mermaid diagram with no library. These are exactly the defects that make light mode stop working and diagrams render as raw/ugly text. Fix any failure; **never hand a file to the user that doesn't pass `--check`.**
