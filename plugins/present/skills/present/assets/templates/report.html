@@ -161,7 +161,7 @@
     _tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-panel')===id); });
     _panels.forEach(function(p){ p.classList.toggle('active', p.id===id); });
     eachChart(function(c){ c.resize(); });   // charts created in a hidden panel need a resize when shown
-    try{ history.replaceState(null,'', '#'+id); }catch(e){}
+    try{ history.replaceState(null,'', '#p-'+id); }catch(e){}   // 'p-' prefix so it never matches a panel id (avoids scroll-to-fragment)
   }
   _tabs.forEach(function(t){ t.addEventListener('click', function(){ showTab(t.getAttribute('data-panel')); }); });
   document.addEventListener('keydown', function(e){
@@ -192,10 +192,14 @@
   document.addEventListener('keydown', function(e){ if(e.key==='p'||e.key==='P'){ printPage(); e.preventDefault(); } });
 
   // Init
+  if('scrollRestoration' in history){ try{ history.scrollRestoration='manual'; }catch(e){} }
   initMermaidSources();
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
-  (function(){ var h=(location.hash||'').replace('#',''); var ids=_panels.map(function(p){return p.id;});
+  (function(){ var h=(location.hash||'').replace(/^#p-/,'').replace(/^#/,''); var ids=_panels.map(function(p){return p.id;});
     showTab(ids.indexOf(h)>=0 ? h : (ids[0]||'')); })();
+  // Open at the top (activating a panel/updating the hash can nudge the scroll position).
+  try{ window.scrollTo(0,0); }catch(e){}
+  window.addEventListener('load', function(){ try{ window.scrollTo(0,0); }catch(e){} });
 
   // SCRIPT placeholder below: build charts (Chart.js) here; don't hardcode tick/grid colors (they follow the theme).
   {{SCRIPT}}
