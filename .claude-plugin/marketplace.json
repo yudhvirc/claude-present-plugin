@@ -8,7 +8,8 @@
     {
       "name": "present",
       "source": "./plugins/present",
-      "description": "Turn data, code, logs, or plain instructions into self-contained, fully-offline HTML — Chart.js charts, Mermaid diagrams, keyboard-navigable slide decks, and pages."
+      "version": "1.0.0",
+      "description": "Turn data, code, logs, or plain instructions into self-contained, fully-offline HTML — Chart.js charts, Mermaid diagrams, keyboard-navigable slide decks, pages, and interactive tabbed reports. Premium light/dark themed."
     }
   ]
 }

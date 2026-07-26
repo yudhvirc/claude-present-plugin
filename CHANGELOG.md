@@ -1,0 +1,43 @@
+# Changelog
+
+All notable changes to the **present** plugin are documented here.
+This project adheres to [Semantic Versioning](https://semver.org/).
+
+## [1.0.0] — 2026-07-25
+
+First stable release. `present` turns data, code, logs, or plain instructions into self-contained, fully-offline HTML.
+
+### Outputs
+- **Charts** from data — CSV/JSON/TSV and **Excel `.xlsx`** → bar, line, pie/doughnut, scatter, radar, stacked, mixed (Chart.js).
+- **Diagrams** from code/architecture or a description — flowchart, dependency/module graph, class, sequence, ER, state, timeline (Mermaid).
+- **Presentations** — keyboard-navigable HTML decks (arrow/Prev/Next nav, progress bar, fullscreen, speaker notes, overview grid, charts embedded on slides).
+- **Pages** — general self-contained HTML (landing pages, one-pagers, documents) authored from instructions.
+- **Interactive reports** — a single-page report with **tabbed sections** and hover **tooltips**, KPI cards, charts, and diagrams (`report.html`).
+
+### Design & theming
+- Premium, professional default look across every template — richer palette, subtly tinted background, elevated cards with soft shadows + hover, gradient badges/buttons, gradient headlines & KPI numbers (with safe solid fallbacks), refined tables and tabs.
+- **Light/dark theme toggle** (persisted) on every output. Charts follow the theme via `Chart.defaults`; diagrams re-render with plugin-matched Mermaid theme variables (node/text/edge/subgraph colors adapt).
+
+### Local-first / offline
+- **Fully offline by default** — bundles Chart.js + Mermaid and inlines them, so output needs no network and nothing leaves the machine (CDN is opt-in).
+- **PDF export** on every output via the browser's print dialog.
+- **Dependency-free `.xlsx` extractors** — PowerShell *and* Node.js, using only built-ins (no Excel, Python, or npm packages).
+
+### Workflow
+- Organized run output: `present-output/<slug>/` with a landing `index.html` and a `data/` folder.
+- Proactively adds diagrams where they aid understanding.
+- Ships as a proper marketplace (`.claude-plugin/marketplace.json`) so it installs with `/plugin marketplace add` + `/plugin install present@present`.
+
+### Notable fixes hardened before release
+- Light-mode "grey wash" — gradients now fade to a same-hue `rgba(…,0)` instead of `transparent` (which interpolates through black).
+- Diagram guidance comment no longer contains example arrows that could HTML-terminate the comment and leak text.
+- Verified end-to-end: all five templates render correctly in both light and dark; Chart.js draws and Mermaid renders + re-themes in a real browser.
+
+### Install
+```
+/plugin marketplace add yudhvirc/claude-present-plugin
+/plugin install present@present
+/reload-plugins
+```
+
+[1.0.0]: https://github.com/yudhvirc/claude-present-plugin/releases/tag/v1.0.0

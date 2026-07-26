@@ -1,6 +1,7 @@
 # present — Claude Code plugin
 
 <p align="center">
+  <a href="https://github.com/yudhvirc/claude-present-plugin/releases"><img alt="Version" src="https://img.shields.io/github/v/release/yudhvirc/claude-present-plugin?label=version&color=38BDF8"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-22C55E.svg"></a>
   <img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-6E56CF">
   <img alt="Output: 100% offline" src="https://img.shields.io/badge/output-100%25%20offline-0EA5E9">

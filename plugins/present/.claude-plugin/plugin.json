@@ -1,7 +1,7 @@
 {
   "name": "present",
-  "version": "0.1.0",
-  "description": "Turn data files, code/architecture, logs, or a plain description into self-contained HTML visuals — charts, diagrams, and keyboard-navigable PPT-style presentations. Local-first: bundles Chart.js + Mermaid so output works fully offline.",
+  "version": "1.0.0",
+  "description": "Turn data files (CSV/JSON/Excel), code/architecture, logs, or plain instructions into self-contained, fully-offline HTML — charts, diagrams, keyboard-navigable presentations, pages, and interactive tabbed reports. Bundles Chart.js + Mermaid; premium light/dark themed output with PDF export.",
   "author": {
     "name": "ACE System Design",
     "email": "info@acesystemdesign.com"
