@@ -7,7 +7,8 @@ This is the detailed guide the `present` skill points to. Read it before generat
 - **Never fabricate data.** Chart/label only what exists in the source. If a value is missing, leave it out and say so.
 - **Fully offline by default — inline every library the output uses.** Charts → inline Chart.js. Any diagram (or a slide/page containing one) → inline Mermaid. Something with both → inline **both**. Only a page with neither needs no `{{LIB}}`. Use CDN links *only* if the user explicitly asks for a smaller file.
 - **Prefer diagrams.** Proactively add a Mermaid diagram wherever it makes something clearer — process/flow, architecture, sequence, decision tree, ER, state machine, timeline, or how parts relate. In pages/reports and decks, favor a diagram over a dense paragraph; aim for at least one wherever there's a process, structure, or relationship. (See the Mermaid diagram-type table below.)
-- **Theme-aware colors.** Every template has a light/dark toggle driven by CSS variables (`--bg --card --ink --muted --grid --accent`). Default is dark. **Do NOT hardcode chart tick/grid colors** — omit `scales.*.ticks.color` and `grid.color` so they inherit `Chart.defaults` and follow the theme. You may still set dataset/series colors (bars, lines, slices) — those stay constant across themes. Mermaid diagrams re-render with the matching Mermaid theme automatically.
+- **Theme-aware colors.** Every template has a light/dark toggle driven by CSS variables (`--bg --card --ink --muted --grid --accent`). Default is dark. **Do NOT hardcode chart tick/grid colors** — omit `scales.*.ticks.color` and `grid.color` so they inherit `Chart.defaults` and follow the theme. You may still set dataset/series colors (bars, lines, slices) — those stay constant across themes.
+- **Never hardcode colors in a Mermaid diagram.** Do **not** add `classDef`, `style`, `fill:`, `stroke:`, or `%%{init}%%` color overrides to the diagram source. The templates render Mermaid with `theme:'base'` + plugin-matched theme variables and re-render it on toggle, so an unstyled diagram automatically matches the palette in **both** light and dark. Hardcoded fills override this and break light mode (the diagram stays dark). Write pure structure — nodes, edges, labels, subgraphs — and let the template color it.
 
 ## Built-in controls (all templates, nothing to fill in)
 - **Theme toggle** — ☀/☂ button (and `T` in slides); persisted in `localStorage` under `viz-theme`.
@@ -48,7 +49,7 @@ This is the detailed guide the `present` skill points to. Read it before generat
 Colors: use a small palette, e.g. `['#38bdf8','#34d399','#fbbf24','#f87171','#a78bfa','#f472b6']`.
 
 ## diagram.html
-- `{{DIAGRAM}}` — the raw Mermaid source (NOT fenced with backticks) placed between the `<pre class="mermaid">` tags. Keep original indentation minimal; Mermaid is whitespace-tolerant but avoid leading indentation on the first line.
+- `{{DIAGRAM}}` — the raw Mermaid source (NOT fenced with backticks) placed between the `<pre class="mermaid">` tags. Keep original indentation minimal; Mermaid is whitespace-tolerant but avoid leading indentation on the first line. **Structure only — no color styling** (`classDef`/`style`/`fill:`/`stroke:`/`%%{init}%%`); the template themes it to match the palette in both light and dark, and hardcoded colors would break that.
 - `{{DEFINITION_BLOCK}}` — optional short caption/legend, or leave blank.
 
 ### Picking a Mermaid diagram type
