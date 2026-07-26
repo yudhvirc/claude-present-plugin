@@ -27,6 +27,9 @@ Real, self-contained, fully-offline HTML output from `/present`:
 **Data → charts** (built from an Excel workbook, with a light/dark toggle + PDF export)
 ![Charts dashboard](docs/screenshot-charts.png)
 
+**Interactive report** — tabbed sections, hover tooltips, KPI cards, charts & diagrams (one self-contained page)
+![Interactive report](docs/screenshot-report.png)
+
 **Presentation** — keyboard-navigable deck (arrows, fullscreen, speaker notes, PDF)
 ![Slide deck](docs/screenshot-deck.png)
 
