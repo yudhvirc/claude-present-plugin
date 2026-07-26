@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  /* Single-page interactive REPORT — tabbed sections + hover tooltips. Offline, theme + PDF. */
+  :root, html[data-theme="dark"] {
+    --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --border:#334155; --accent:#38bdf8; --link:#7dd3fc; --tabbg:#0b1120;
+  }
+  html[data-theme="light"] {
+    --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#475569; --border:#e2e8f0; --accent:#0284c7; --link:#0369a1; --tabbg:#eef2f7;
+  }
+  :root { --display-font: system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+          --body-font:    system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--body-font); line-height:1.6;
+         transition:background .2s,color .2s; }
+  .wrap { max-width:1080px; margin:0 auto; padding:40px 24px 80px; }
+  header h1 { font-family:var(--display-font); font-size:2rem; line-height:1.15; margin:0 0 .2em; }
+  header .sub { color:var(--muted); font-size:1.1rem; margin:0 0 20px; }
+  h2 { font-family:var(--display-font); font-size:1.35rem; margin:0 0 .6em; }
+  h3 { font-size:1.05rem; margin:1.4em 0 .4em; }
+  a { color:var(--link); }
+  .muted { color:var(--muted); }
+
+  /* Tabs */
+  .tabs { position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; gap:4px; padding:8px 0;
+          background:var(--bg); border-bottom:1px solid var(--border); margin-bottom:24px; }
+  .tab { appearance:none; background:transparent; color:var(--muted); border:0; border-radius:8px 8px 0 0;
+         padding:10px 16px; font-size:.95rem; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; }
+  .tab:hover { color:var(--ink); background:var(--tabbg); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .panel { display:none; animation:fade .25s ease; }
+  .panel.active { display:block; }
+  @keyframes fade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .panel-title { display:none; }   /* shown only in print */
+
+  /* Content blocks */
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin:14px 0; }
+  .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .kpi { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+  .kpi .n { font-family:var(--display-font); font-size:1.8rem; font-weight:700; }
+  .kpi .l { color:var(--muted); font-size:.85rem; }
+  table { width:100%; border-collapse:collapse; margin:14px 0; }
+  th, td { border:1px solid var(--border); padding:8px 12px; text-align:left; }
+  th { background:var(--panel); }
+  .chart-wrap { position:relative; height:340px; margin:8px 0; }
+  .badge { display:inline-block; background:var(--accent); color:#04212e; border-radius:999px; padding:2px 12px; font-size:.78rem; font-weight:700; }
+
+  /* Tooltip — pure CSS, offline. Use <span class="tip" data-tip="explanation">term</span> */
+  .tip { position:relative; border-bottom:1px dotted var(--muted); cursor:help; }
+  .tip:hover::after, .tip:focus::after { content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 8px);
+    transform:translateX(-50%); background:var(--panel); color:var(--ink); border:1px solid var(--border);
+    border-radius:8px; padding:8px 11px; width:max-content; max-width:280px; white-space:normal; font-size:.82rem;
+    font-weight:400; line-height:1.4; z-index:60; box-shadow:0 8px 28px rgba(0,0,0,.35); }
+  .tip:hover::before, .tip:focus::before { content:""; position:absolute; left:50%; bottom:calc(100% + 2px);
+    transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--border); z-index:60; }
+
+  .toolbar { position:fixed; top:16px; right:18px; display:flex; gap:8px; z-index:50; }
+  .toolbar button { background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:8px;
+                    padding:6px 12px; font-size:.85rem; cursor:pointer; }
+  .toolbar button:hover { border-color:var(--accent); }
+  footer { color:var(--muted); font-size:.8rem; margin-top:32px; }
+
+  /* Print / PDF: show ALL tabs' content, each with its title; hide chrome. */
+  body.printing .tabs { display:none; }
+  body.printing .panel { display:block !important; }
+  body.printing .panel-title { display:block; margin-top:28px; }
+  @media print {
+    @page { margin: 14mm; }
+    body { background:#fff; }
+    .toolbar, .tabs { display:none !important; }
+    .panel { display:block !important; }
+    .panel-title { display:block; }
+    .card, table, .chart-wrap, .kpi { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+  <button onclick="printPage()" title="Save as PDF (P)">⤓ PDF</button>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1>{{TITLE}}</h1>
+    <p class="sub">{{SUBTITLE}}</p>
+  </header>
+
+  <!-- TABS placeholder below: one <button> per section. data-panel must match a panel id.
+       <button class="tab" data-panel="overview">Overview</button>
+       <button class="tab" data-panel="trends">Trends</button> -->
+  <nav class="tabs" role="tablist" aria-label="Report sections">
+    {{TABS}}
+  </nav>
+
+  <main>
+    <!-- PANELS placeholder below: one <section class="panel" id="…"> per tab (id matches data-panel).
+         Start the FIRST panel with class="panel active". Put a hidden print title as the first child.
+    <section class="panel active" id="overview">
+      <h2 class="panel-title">Overview</h2>
+      <div class="grid">
+        <div class="kpi"><div class="n">$343K</div><div class="l">Dec revenue</div></div>
+      </div>
+      <p>Use <span class="tip" data-tip="Monthly recurring revenue">MRR</span> for the run-rate view.</p>
+      <div class="chart-wrap"><canvas id="c1"></canvas></div>
+    </section> -->
+    {{PANELS}}
+  </main>
+
+  <footer>Generated by /present · self-contained interactive report · opens in any browser.</footer>
+</div>
+
+<!-- LIB placeholder below: inline Chart.js and/or Mermaid here (fully offline). Omit if the report has neither. -->
+{{LIB}}
+
+<script>
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function applyChartDefaults(){ if(typeof Chart==='undefined') return;
+    Chart.defaults.color = cssVar('--ink'); Chart.defaults.borderColor = cssVar('--border'); }
+  function eachChart(fn){ if(typeof Chart==='undefined') return;
+    document.querySelectorAll('canvas').forEach(cv=>{ const c=Chart.getChart(cv); if(c){ try{ fn(c); }catch(e){} } }); }
+
+  // Mermaid, themed to match the plugin palette (base theme) in light + dark.
+  var _mmd = [];
+  function initMermaidSources(){ if(typeof mermaid==='undefined') return;
+    document.querySelectorAll('pre.mermaid, .mermaid').forEach(el=> _mmd.push([el, el.textContent])); }
+  function mmVars(dark){ return dark ? {
+    darkMode:true, background:'transparent', fontFamily:"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif", fontSize:'14px',
+    primaryColor:'#1e293b', mainBkg:'#1e293b', primaryBorderColor:'#475569', nodeBorder:'#475569',
+    primaryTextColor:'#e2e8f0', nodeTextColor:'#e2e8f0', textColor:'#e2e8f0', titleColor:'#e2e8f0',
+    lineColor:'#64748b', secondaryColor:'#0b1120', tertiaryColor:'#0b1120',
+    clusterBkg:'rgba(148,163,184,0.08)', clusterBorder:'#334155', edgeLabelBackground:'#0f172a'
+  } : {
+    darkMode:false, background:'transparent', fontFamily:"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif", fontSize:'14px',
+    primaryColor:'#f1f5f9', mainBkg:'#f1f5f9', primaryBorderColor:'#94a3b8', nodeBorder:'#94a3b8',
+    primaryTextColor:'#0f172a', nodeTextColor:'#0f172a', textColor:'#0f172a', titleColor:'#0f172a',
+    lineColor:'#64748b', secondaryColor:'#f1f5f9', tertiaryColor:'#f1f5f9',
+    clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff'
+  }; }
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
+    var dark = document.documentElement.getAttribute('data-theme')==='dark';
+    mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
+      flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
+    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+    try{ mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) }); }catch(e){} }
+
+  function setTheme(t){ document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem('viz-theme', t); }catch(e){}
+    document.getElementById('themeBtn').textContent = (t==='dark' ? '☀ Light' : '☾ Dark');
+    applyChartDefaults(); eachChart(c=> c.update()); renderMermaid(); }
+  function toggleTheme(){ setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
+
+  // Tabs
+  var _tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var _panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  function showTab(id){
+    _tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-panel')===id); });
+    _panels.forEach(function(p){ p.classList.toggle('active', p.id===id); });
+    eachChart(function(c){ c.resize(); });   // charts created in a hidden panel need a resize when shown
+    try{ history.replaceState(null,'', '#'+id); }catch(e){}
+  }
+  _tabs.forEach(function(t){ t.addEventListener('click', function(){ showTab(t.getAttribute('data-panel')); }); });
+  document.addEventListener('keydown', function(e){
+    if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
+    var i = _tabs.findIndex(function(t){ return t.classList.contains('active'); });
+    if(i<0) return; i = (i + (e.key==='ArrowRight'?1:-1) + _tabs.length) % _tabs.length;
+    _tabs[i].focus(); showTab(_tabs[i].getAttribute('data-panel'));
+  });
+
+  // PDF export — reveal all panels (so the whole report prints) in light theme, then restore.
+  var _prevTheme=null, _prevTab=null;
+  window.addEventListener('beforeprint', function(){
+    _prevTheme = document.documentElement.getAttribute('data-theme');
+    var active = _tabs.find(function(t){ return t.classList.contains('active'); });
+    _prevTab = active ? active.getAttribute('data-panel') : null;
+    if(_prevTheme!=='light'){ document.documentElement.setAttribute('data-theme','light'); applyChartDefaults(); }
+    document.body.classList.add('printing');
+    void document.body.offsetHeight;
+    eachChart(function(c){ c.resize(); c.update('none'); }); renderMermaid();
+  });
+  window.addEventListener('afterprint', function(){
+    document.body.classList.remove('printing');
+    if(_prevTheme && _prevTheme!=='light'){ document.documentElement.setAttribute('data-theme',_prevTheme); applyChartDefaults(); }
+    if(_prevTab) showTab(_prevTab);
+    eachChart(function(c){ c.resize(); c.update('none'); }); renderMermaid();
+  });
+  function printPage(){ window.print(); }
+  document.addEventListener('keydown', function(e){ if(e.key==='p'||e.key==='P'){ printPage(); e.preventDefault(); } });
+
+  // Init
+  initMermaidSources();
+  (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
+  (function(){ var h=(location.hash||'').replace('#',''); var ids=_panels.map(function(p){return p.id;});
+    showTab(ids.indexOf(h)>=0 ? h : (ids[0]||'')); })();
+
+  // SCRIPT placeholder below: build charts (Chart.js) here; don't hardcode tick/grid colors (they follow the theme).
+  {{SCRIPT}}
+</script>
+</body>
+</html>

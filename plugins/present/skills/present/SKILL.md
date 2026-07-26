@@ -23,7 +23,8 @@ Pick the closest match (a request can combine several):
 | **Logs / command output / tabular text** | Summary chart or a small dashboard (counts, timelines, distributions) |
 | **Free-form description** ("draw a login flow", "chart these numbers…") | Whatever fits — a diagram or a chart |
 | **"slides" / "deck" / "presentation" / "PPT"** | A keyboard-navigable HTML presentation (see Slides) |
-| **Instructions to build content** ("make a presentation about X", "build an HTML landing page / one-pager / report about Y") | You **generate the content** from the request + your knowledge, then render it — a presentation (`slides.html`) or a general HTML page (`page.html`). See "Building from instructions". |
+| **Instructions to build content** ("make a presentation about X", "build an HTML landing page / one-pager about Y") | You **generate the content** from the request + your knowledge, then render it — a presentation (`slides.html`) or a general HTML page (`page.html`). See "Building from instructions". |
+| **A "report"** ("make a report on X", "quarterly report", "analysis report") | A single-page **interactive** report (`report.html`) — tabbed sections + hover tooltips, with KPI cards, charts, and diagrams. |
 
 If the request is ambiguous about what to draw, ask **one** brief question, then proceed.
 
@@ -48,7 +49,8 @@ Never scatter files in the working directory. Every run writes into a dedicated 
 - **`chart.html`** — one or many Chart.js charts. Replace `{{TITLE}}`, `{{LIB}}`, `{{BODY}}`, `{{SCRIPT}}`.
 - **`diagram.html`** — a Mermaid diagram. Replace `{{TITLE}}`, `{{LIB}}`, `{{DIAGRAM}}` (the Mermaid source), `{{DEFINITION_BLOCK}}`.
 - **`slides.html`** — PPT-style presentation. Replace `{{TITLE}}`, `{{LIB}}`, `{{SLIDES}}`, `{{CHART_INIT}}`.
-- **`page.html`** — general self-contained HTML page (landing page, one-pager, report, document, simple dashboard). Replace `{{TITLE}}`, `{{CONTENT}}` (the page body), `{{LIB}}` (only if it has charts), `{{SCRIPT}}` (optional JS). `page.html` and `slides.html` also expose `--display-font`/`--body-font` for an optional offline aesthetic direction (see authoring.md → "Visual polish").
+- **`page.html`** — general self-contained HTML page (landing page, one-pager, document, simple dashboard). Replace `{{TITLE}}`, `{{CONTENT}}` (the page body), `{{LIB}}` (only if it has charts), `{{SCRIPT}}` (optional JS). `page.html` and `slides.html` also expose `--display-font`/`--body-font` for an optional offline aesthetic direction (see authoring.md → "Visual polish").
+- **`report.html`** — **use this whenever the user asks for a "report".** A single-page **interactive** report: tabbed sections (no scrolling between topics) + hover **tooltips** for definitions/detail, plus KPI cards, tables, charts, and diagrams. Replace `{{TITLE}}`, `{{SUBTITLE}}`, `{{TABS}}` (one `<button class="tab" data-panel="…">` per section), `{{PANELS}}` (one `<section class="panel" id="…">` per tab — mark the first `class="panel active"`), `{{LIB}}`, `{{SCRIPT}}`. Tabs, tooltips, theme toggle, and PDF (prints all tabs) are built in.
 
 Each placeholder appears **exactly once** in a template (except `{{TITLE}}`, which fills both `<title>` and the heading). When you fill a template, also delete the `<!-- … placeholder below … -->` guidance comments so the output is clean.
 
@@ -91,7 +93,7 @@ When extracting `.xlsx`, point the extractor's output into the run folder's `dat
 ## Building from instructions (content you generate)
 When the user describes what they want rather than handing you data — e.g. "make a 6-slide deck introducing our onboarding process", "build an HTML landing page for a coffee subscription", "turn these notes into a one-pager", "create an interactive HTML page that shows a countdown" — **you author the content**, then render it into a self-contained HTML file:
 
-1. **Pick the shape:** a *presentation* → `slides.html`; a *page / document / landing page / report / dashboard* → `page.html`; if it's really just a chart or a diagram, use those templates instead.
+1. **Pick the shape:** a *report* → `report.html` (interactive, tabbed + tooltips); a *presentation* → `slides.html`; a *page / document / landing page / dashboard* → `page.html`; if it's really just a chart or a diagram, use those templates instead.
 2. **Draft the content** from the request and your own knowledge. Keep presentations to one idea per slide; keep pages well-structured (clear headings, short paragraphs, `.card`/`.grid`/tables where useful). Embed charts (Chart.js) where there's data, and **add a Mermaid diagram wherever it makes the content easier to understand** — for any process, architecture, timeline, or relationship, include at least one diagram rather than a dense paragraph. (Both libraries are inlined, so the page stays fully offline.) For a polished, non-generic look, apply the **"Visual polish"** section of `references/authoring.md` — commit to one aesthetic direction and set an offline font preset via `--display-font`/`--body-font`. (Applies to `page.html`/`slides.html` only; keep charts/diagrams neutral.)
 3. **Ask only what's needed:** if key specifics are missing (audience, length, tone, must-include points, brand color), ask one short question — otherwise proceed with sensible defaults and note the assumptions.
 4. **Accuracy:** only state facts you're confident in. For anything uncertain or time-sensitive, hedge, leave a clearly-marked placeholder (e.g. `[confirm figure]`), or ask — never fabricate specifics (names, stats, quotes, prices).

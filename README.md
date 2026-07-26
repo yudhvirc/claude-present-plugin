@@ -17,6 +17,7 @@ Invoke the skill and describe (or point at) what you want to present:
 - **Free-form description → the fitting diagram or chart.**
 - **"Make a deck / slides / presentation"** → a self-contained HTML presentation with arrow-key navigation, Prev/Next buttons, progress bar, fullscreen (F), speaker notes (S), an overview grid (Esc), and charts embedded on slides.
 - **"Build an HTML page/landing page/one-pager about X"** → Claude generates the content from your instructions and renders a general self-contained HTML page (`page.html`) — theme toggle + PDF export included.
+- **"Make a report"** → a single-page **interactive** report (`report.html`) with **tabbed sections**, hover **tooltips**, KPI cards, charts, and diagrams.
 
 Default output is **one self-contained, fully-offline `.html` file** — Chart.js and Mermaid are inlined, so nothing loads from the network. Ask for **CDN** if you'd rather have a smaller file, or for **Mermaid text** / **SVG** when you need those instead. Every run is written into an organized `present-output/<slug>/` folder (with an `index.html` landing page when there are multiple artifacts).
 
@@ -126,7 +127,7 @@ plugins/present/                    The plugin (source: ./plugins/present)
   skills/present/
     SKILL.md                        Skill instructions (workflow)
     references/authoring.md         How to fill templates + chart/diagram recipes
-    assets/templates/               chart.html · diagram.html · slides.html · page.html
+    assets/templates/               chart.html · diagram.html · slides.html · page.html · report.html
     assets/lib/                     Bundled Chart.js + Mermaid (offline)
     assets/scripts/xlsx-to-json.ps1 Dependency-free .xlsx → JSON/CSV extractor (PowerShell)
     assets/scripts/xlsx-to-json.js  Dependency-free .xlsx → JSON/CSV extractor (Node.js)

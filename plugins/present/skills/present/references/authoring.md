@@ -96,6 +96,17 @@ Use for anything that isn't primarily a single chart, diagram, or slide deck: la
 
 When authoring content from a user's instructions, generate accurate, well-organized copy; mark anything uncertain as `[confirm …]` rather than inventing specifics.
 
+## report.html (interactive reports)
+Use whenever the user asks for a **report**. A single-page app with **tabbed sections** + hover **tooltips** (offline; theme + PDF built in).
+- `{{TITLE}}` / `{{SUBTITLE}}` — title + one-line subtitle (leave subtitle empty if none).
+- `{{TABS}}` — one button per section: `<button class="tab" data-panel="ID">Label</button>`. Keep 2–6 tabs.
+- `{{PANELS}}` — one `<section class="panel" id="ID">` per tab (id **must equal** the tab's `data-panel`). Mark the FIRST `class="panel active"`. Begin each panel with `<h2 class="panel-title">Label</h2>` — hidden on screen, shown in the PDF so each printed section is titled.
+- Inside panels: `.kpi` (with `.n` big number + `.l` label) in a `.grid` for headline metrics; `.card` blocks; `table`; `<div class="chart-wrap"><canvas id="…"></canvas></div>` for charts; `<pre class="mermaid">…</pre>` for diagrams.
+- **Tooltips:** wrap a term in `<span class="tip" data-tip="explanation">term</span>` — a dotted underline appears and the note shows on hover/focus. Ideal for defining metrics, acronyms, or caveats without cluttering the layout.
+- `{{LIB}}` — inline Chart.js and/or Mermaid if used (offline default). `{{SCRIPT}}` — chart creation (don't hardcode tick/grid colors; they follow the theme). Diagrams are theme-synced automatically (no manual `mermaid.initialize`).
+- Also exposes `--display-font`/`--body-font` for an aesthetic direction (see "Visual polish").
+- Built in: tab switching (+ `←`/`→` keys), deep-linking via `#panel-id`, light/dark toggle, and a PDF export that **reveals every tab** (prints the whole report). Charts created in a hidden tab auto-resize when that tab is first shown.
+
 ## Visual polish (page.html & slides.html ONLY)
 Raises the design quality of instruction-built pages and decks without sacrificing offline output or determinism. **Do NOT apply any of this to `chart.html` / `diagram.html`** — those stay neutral and clarity-first. The theme toggle, PDF export, and deterministic defaults must keep working.
 
