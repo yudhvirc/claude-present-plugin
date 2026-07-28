@@ -22,7 +22,7 @@
   .deck { position:fixed; inset:0; }
   .slide { position:absolute; inset:0; display:none; flex-direction:column;
            justify-content:center; align-items:center; text-align:center;
-           padding:2.5vh 3vw; overflow:hidden; animation:fade .35s ease; }
+           padding:2.5vh 3vw 7vh; overflow:hidden; animation:fade .35s ease; }   /* extra bottom = clear of the HUD */
   .slide.active { display:flex; }
   @keyframes fade { from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
   /* Auto-fit wrapper: JS scales this so each slide's content fills the frame (max readable size, never
@@ -88,7 +88,8 @@
   body.printing .deck { position:static; }
   body.printing .deck.overview { overflow:visible; }
   body.printing .slide { display:flex !important; position:relative; inset:auto; width:100%; height:100vh;
-           margin:0; border:0; border-radius:0; transform:none; animation:none; background:var(--bg); }
+           margin:0; border:0; border-radius:0; transform:none; animation:none; background:var(--bg);
+           padding-bottom:2.5vh; }   /* HUD is hidden when printing — reclaim its reserved strip */
   body.printing .slide.title { background:linear-gradient(135deg,#0f172a,#1e3a5f); }
   body.printing .chart-wrap { height:60vh; }
   body.printing .bar, body.printing .hud, body.printing .help, body.printing #notes { display:none !important; }
@@ -175,14 +176,20 @@
     while(s.firstChild) fit.appendChild(s.firstChild);
     s.appendChild(fit);
   });
-  // Scale a slide's content to fill ~94% of the frame (min of the two axes → never overflows),
-  // clamped so a single word doesn't balloon and an overfull slide shrinks to fit instead of clipping.
+  // Scale a slide's content to fill the slide's CONTENT box — i.e. the frame minus its padding, so the
+  // gutters survive (transform ignores layout, so measuring the border box would let text run to the edge).
+  // min of the two axes → never overflows; clamped so a single word doesn't balloon and an overfull slide
+  // shrinks to fit instead of clipping.
   function fitSlide(s){
     const fit = s.querySelector(':scope > .fit'); if(!fit) return;
     fit.style.transform = 'none';
     if(!s.clientWidth || !s.clientHeight) return;         // hidden slide — can't measure
-    const w = fit.scrollWidth, h = fit.scrollHeight; if(!w || !h) return;
-    let k = Math.min(s.clientWidth * 0.94 / w, s.clientHeight * 0.94 / h);
+    const cs = getComputedStyle(s);
+    const availW = s.clientWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const availH = s.clientHeight - parseFloat(cs.paddingTop)  - parseFloat(cs.paddingBottom);
+    const w = fit.scrollWidth, h = fit.scrollHeight;
+    if(!w || !h || availW <= 0 || availH <= 0) return;
+    let k = Math.min(availW / w, availH / h);
     k = Math.max(0.4, Math.min(k, 2.6));
     fit.style.transform = 'scale(' + k + ')';
   }
