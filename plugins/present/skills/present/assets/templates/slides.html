@@ -194,6 +194,11 @@
     fit.style.transform = 'scale(' + k + ')';
   }
   function fitActive(){ requestAnimationFrame(function(){ fitSlide(slides[i]); }); }
+  // Chart.js sizes a responsive canvas from its container's getBoundingClientRect, which INCLUDES our fit
+  // transform. Resizing a chart while a slide is scaled would therefore bake the scaled size into the
+  // canvas and blow the content past the frame. Always drop the transforms first.
+  function unfit(){ slides.forEach(function(s){
+    const f = s.querySelector(':scope > .fit'); if(f) f.style.transform = 'none'; }); }
   window.addEventListener('resize', function(){
     if(document.body.classList.contains('printing')) slides.forEach(fitSlide); else fitActive();
   });
@@ -314,12 +319,14 @@
   window.addEventListener('beforeprint', function(){
     document.body.classList.add('printing');
     if(PRINT_NOTES) document.body.classList.add('print-notes');
+    unfit();
     void document.body.offsetHeight;      // force reflow so canvases pick up print layout
     eachChart(c=> c.resize());
     slides.forEach(fitSlide);             // every slide is visible when printing — fit each
   });
   window.addEventListener('afterprint', function(){
     document.body.classList.remove('printing','print-notes');
+    unfit();
     eachChart(c=> c.resize());
     render();
   });
