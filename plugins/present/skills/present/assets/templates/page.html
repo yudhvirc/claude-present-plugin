@@ -146,11 +146,37 @@
       mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
         flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
       _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-      return mermaid.run({ nodes:_mmd.map(function(m){ return m[0]; }) });
+      var _nodes = _mmd.map(function(m){ return m[0]; });
+      return withMeasurable(_nodes, function(){ return mermaid.run({ nodes:_nodes }); });
     });
     return _rendering; }
   // Disable Mermaid's built-in auto-run immediately so it never races our explicit, themed render.
   if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
+  // Mermaid measures label text in the live DOM. A diagram inside a hidden container
+  // (an inactive tab panel, an off-screen slide) measures 0, dagre then emits
+  // "translate(undefined, NaN)" and Mermaid paints its generic "Syntax error" SVG.
+  // Reveal any hidden ancestors off-screen for the duration of the run, then restore.
+  function withMeasurable(els, fn){
+    var stash=[];
+    els.forEach(function(el){
+      for(var n=el; n && n.nodeType===1; n=n.parentElement){
+        if(!n.__mmStash && getComputedStyle(n).display==='none'){
+          n.__mmStash=1; stash.push([n, n.getAttribute('style')]);
+          n.style.setProperty('display','block','important');
+          n.style.setProperty('position','absolute','important');
+          n.style.setProperty('visibility','hidden','important');
+          n.style.setProperty('left','-99999px','important');
+          n.style.setProperty('width','1100px','important');
+        }
+      }
+    });
+    function restore(){ stash.forEach(function(s){
+      if(s[1]===null) s[0].removeAttribute('style'); else s[0].setAttribute('style',s[1]);
+      delete s[0].__mmStash; }); stash=[]; }
+    var r; try{ r=fn(); }catch(e){ restore(); throw e; }
+    if(r && typeof r.then==='function') r.then(restore, restore); else restore();
+    return r;
+  }
   initMermaidSources();
 
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();

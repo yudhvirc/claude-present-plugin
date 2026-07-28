@@ -3,6 +3,15 @@
 All notable changes to the **present** plugin are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] — 2026-07-28
+
+### Fixed
+- **Mermaid diagrams rendered as "Syntax error" on first load, then rendered fine after a browser refresh.** Not a syntax problem at all: Mermaid measures label text in the live DOM, so a diagram inside a hidden container (an inactive `.panel` tab in `report.html`, an off-screen slide in `slides.html`) measures zero. Dagre then produced `translate(undefined, NaN)` coordinates, the render threw, and Mermaid painted its *generic* error SVG — which always reads "Syntax error in text" regardless of the real cause.
+  - `renderMermaid()` in all four templates now wraps `mermaid.run()` in `withMeasurable()`, which temporarily reveals hidden ancestors off-screen (`position:absolute; visibility:hidden; left:-99999px`) for the duration of the run and restores the original inline styles afterwards — including on the async path, since `mermaid.run()` returns a promise.
+  - `report.html` additionally now calls `showTab()` **before** the first `setTheme()`/`renderMermaid()`. Previously the initial render ran while *every* panel was still `display:none`, and because `mermaid.run()` walks nodes asynchronously it became a race: nodes processed before `showTab()` failed, nodes processed after succeeded. A warm bytecode cache on reload shifted that timing, which is why refreshing appeared to "fix" it.
+
+_Verified with headless Edge on a real 3-diagram report: before, two of three diagrams rendered as 16×16 error SVGs with `<g> attribute transform: Expected number, "translate(undefined, NaN)"` on the console; after, all three render with real geometry and the console is clean._
+
 ## [1.1.2] — 2026-07-25
 
 ### Fixed
