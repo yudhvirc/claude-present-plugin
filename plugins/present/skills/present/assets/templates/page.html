@@ -86,6 +86,9 @@
     h1 { -webkit-text-fill-color:var(--ink); color:var(--ink); }
   }
 </style>
+<!-- FONTS placeholder below: build.js fills this with an inlined offline designer-font preset when
+     --fonts is passed (e.g. --fonts fraunces-inter). Left empty = the system font stack. -->
+{{FONTS}}
 </head>
 <body>
 <div class="toolbar">
@@ -125,21 +128,30 @@
     primaryColor:'#1e293b', mainBkg:'#1e293b', primaryBorderColor:'#475569', nodeBorder:'#475569',
     primaryTextColor:'#e2e8f0', nodeTextColor:'#e2e8f0', textColor:'#e2e8f0', titleColor:'#e2e8f0',
     lineColor:'#64748b', secondaryColor:'#0b1120', tertiaryColor:'#0b1120',
-    clusterBkg:'rgba(148,163,184,0.08)', clusterBorder:'#334155', edgeLabelBackground:'#0f172a'
+    clusterBkg:'rgba(148,163,184,0.08)', clusterBorder:'#334155', edgeLabelBackground:'#0f172a',
+    attributeBackgroundColorOdd:'#111c31', attributeBackgroundColorEven:'#0b1424'   /* ER rows — dark, readable */
   } : {
     darkMode:false, background:'transparent', fontFamily:"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif", fontSize:'14px',
     primaryColor:'#f1f5f9', mainBkg:'#f1f5f9', primaryBorderColor:'#94a3b8', nodeBorder:'#94a3b8',
     primaryTextColor:'#0f172a', nodeTextColor:'#0f172a', textColor:'#0f172a', titleColor:'#0f172a',
     lineColor:'#64748b', secondaryColor:'#f1f5f9', tertiaryColor:'#f1f5f9',
-    clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff'
+    clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff',
+    attributeBackgroundColorOdd:'#ffffff', attributeBackgroundColorEven:'#eef2f8'   /* ER rows — light */
   }; }
-  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
-    var dark = document.documentElement.getAttribute('data-theme')==='dark';
-    mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
-      flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
-    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-    var _nodes=_mmd.map(function(m){ return m[0]; });
-    try{ return withMeasurable(_nodes, function(){ return mermaid.run({ nodes:_nodes }); }); }catch(e){} }
+  var _rendering = null;
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return _rendering || Promise.resolve();
+    // Serialize renders so two mermaid.run() calls never overlap (overlap → intermittent "Syntax error in text").
+    _rendering = Promise.resolve(_rendering).catch(function(){}).then(function(){
+      var dark = document.documentElement.getAttribute('data-theme')==='dark';
+      mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
+        flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
+      _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+      var _nodes = _mmd.map(function(m){ return m[0]; });
+      return withMeasurable(_nodes, function(){ return mermaid.run({ nodes:_nodes }); });
+    });
+    return _rendering; }
+  // Disable Mermaid's built-in auto-run immediately so it never races our explicit, themed render.
+  if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
   // Mermaid measures label text in the live DOM. A diagram inside a hidden container
   // (an inactive tab panel, an off-screen slide) measures 0, dagre then emits
   // "translate(undefined, NaN)" and Mermaid paints its generic "Syntax error" SVG.
@@ -165,7 +177,6 @@
     if(r && typeof r.then==='function') r.then(restore, restore); else restore();
     return r;
   }
-
   initMermaidSources();
 
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();

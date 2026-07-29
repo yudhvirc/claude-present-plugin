@@ -16,20 +16,44 @@
   * { box-sizing:border-box; }
   html,body { margin:0; height:100%; }
   body { font-family: var(--body-font);
-         background:var(--bg); color:var(--ink); overflow:hidden; }
+         background:var(--bg); color:var(--ink); overflow:hidden;
+         -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
 
   .deck { position:fixed; inset:0; }
   .slide { position:absolute; inset:0; display:none; flex-direction:column;
            justify-content:center; align-items:center; text-align:center;
-           padding:6vw; animation:fade .35s ease; }
+           padding:2.5vh 3vw 7vh; overflow:hidden; animation:fade .35s ease; }   /* extra bottom = clear of the HUD */
   .slide.active { display:flex; }
   @keyframes fade { from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
-  .slide h1 { font-size:clamp(1.9rem, 4vw, 3.6rem); margin:0 0 .4em; line-height:1.1; font-family: var(--display-font); }
-  .slide h2 { font-size:clamp(1.4rem, 3vw, 2.7rem); margin:0 0 .5em; font-family: var(--display-font); }
-  .slide p, .slide li { font-size:clamp(1rem, 1.9vw, 1.4rem); color:var(--ink); line-height:1.5; max-width:70ch; }
-  .slide ul { text-align:left; }
-  .slide .chart-wrap { position:relative; width:min(70vw,900px); height:52vh; }
+  /* Auto-fit wrapper: JS scales this so each slide's content fills the frame (max readable size, never
+     clipping). transform doesn't affect layout, so the flex centering still holds. */
+  .fit { display:flex; flex-direction:column; align-items:center; justify-content:center;
+         gap:clamp(.6rem, 3.2vh, 2.2rem); transform-origin:center center; will-change:transform; }
+  .deck.overview .fit { transform:none !important; }   /* overview cells use their own sizing */
+  /* Presentation-scale type: big enough to fill a 16:9 screen and read from across a room. A shared, wide
+     content column + generous line/bullet spacing makes the content occupy the slide instead of clustering
+     small in the middle with dead space above and below. */
+  .slide h1 { font-size:clamp(3rem, 6.2vw, 6rem); margin:0; line-height:1.04; font-weight:600; letter-spacing:-.01em;
+              font-family: var(--display-font); font-optical-sizing:auto; }
+  .slide h2 { font-size:clamp(2.4rem, 5vw, 4.2rem); margin:0; line-height:1.1; font-weight:600; letter-spacing:-.005em;
+              font-family: var(--display-font); font-optical-sizing:auto; }
+  .slide p, .slide li { font-size:clamp(1.55rem, 2.9vw, 2.6rem); color:var(--ink); line-height:1.45; font-weight:400; }
+  .slide strong, .slide b { font-weight:600; }   /* Inter 600, not heavy 700 */
+  .slide h1, .slide h2, .slide p, .slide ul, .slide ol { max-width:min(1320px, 90vw); }
+  .slide ul, .slide ol { text-align:left; margin:0 auto; padding-left:1.1em; display:flex; flex-direction:column;
+                         gap:clamp(.5rem, 2.6vh, 1.4rem); }
+  .slide li { margin:0; }
+  .slide li::marker { color:var(--accent); }
+  .slide .chart-wrap { position:relative; width:min(82vw,1150px); height:60vh; }
   .slide.title { background:linear-gradient(135deg,#0f172a,#1e3a5f); }
+
+  /* Mermaid diagrams: scale UP to fill the slide (Mermaid's useMaxWidth caps the SVG at its tiny intrinsic
+     size, so without this a diagram renders as a small blob in a huge empty slide). The SVG has a viewBox and
+     preserves aspect ratio, so forcing it to the box scales it uniformly and centers it. */
+  .slide .mermaid { margin:.4em 0 0; width:min(92vw,1250px); height:60vh; display:flex; align-items:center;
+                    justify-content:center; overflow:hidden; background:none; border:0; padding:0; }
+  .slide .mermaid svg { max-width:none !important; width:100% !important; height:100% !important; }
+  .slide h2 + .mermaid { height:56vh; }   /* leave room when the slide also has a heading */
 
   /* Chrome */
   .bar { position:fixed; left:0; right:0; bottom:0; height:5px; background:#1e293b; z-index:20; }
@@ -56,7 +80,7 @@
   .deck.overview .slide h1 { font-size:1.6vw; } .deck.overview .slide h2 { font-size:1.3vw; }
   .deck.overview .slide p, .deck.overview .slide li { font-size:1vw; }
   .deck.overview .slide:hover { border-color:var(--accent); }
-  .deck.overview .chart-wrap { display:none; }
+  .deck.overview .chart-wrap, .deck.overview .mermaid { display:none; }
 
   /* Print / PDF export: reveal every slide, one per page, hide the chrome.
      `.printing` mirrors the print layout on screen so Chart.js canvases re-rasterize at the right size. */
@@ -64,7 +88,8 @@
   body.printing .deck { position:static; }
   body.printing .deck.overview { overflow:visible; }
   body.printing .slide { display:flex !important; position:relative; inset:auto; width:100%; height:100vh;
-           margin:0; border:0; border-radius:0; transform:none; animation:none; background:var(--bg); }
+           margin:0; border:0; border-radius:0; transform:none; animation:none; background:var(--bg);
+           padding-bottom:2.5vh; }   /* HUD is hidden when printing — reclaim its reserved strip */
   body.printing .slide.title { background:linear-gradient(135deg,#0f172a,#1e3a5f); }
   body.printing .chart-wrap { height:60vh; }
   body.printing .bar, body.printing .hud, body.printing .help, body.printing #notes { display:none !important; }
@@ -92,6 +117,9 @@
     .bar, .hud, .help, #notes { display:none !important; }
   }
 </style>
+<!-- FONTS placeholder below: build.js fills this with an inlined offline designer-font preset when
+     --fonts is passed (e.g. --fonts fraunces-inter). Left empty = the system font stack. -->
+{{FONTS}}
 </head>
 <body>
 
@@ -137,10 +165,49 @@
   const notes = document.getElementById('notes');
   let i = 0, overview = false, notesOn = false;
 
+  // Disable Mermaid's built-in auto-run IMMEDIATELY (before it fires) so it never races our explicit,
+  // themed render — that race is what makes a diagram intermittently show "Syntax error in text" until refresh.
+  if(typeof mermaid!=='undefined'){ try{ mermaid.initialize({ startOnLoad:false }); }catch(e){} }
+
+  // Wrap each slide's content in a .fit box we can scale to fill the frame.
+  slides.forEach(function(s){
+    if(s.querySelector(':scope > .fit')) return;
+    const fit = document.createElement('div'); fit.className = 'fit';
+    while(s.firstChild) fit.appendChild(s.firstChild);
+    s.appendChild(fit);
+  });
+  // Scale a slide's content to fill the slide's CONTENT box — i.e. the frame minus its padding, so the
+  // gutters survive (transform ignores layout, so measuring the border box would let text run to the edge).
+  // min of the two axes → never overflows; clamped so a single word doesn't balloon and an overfull slide
+  // shrinks to fit instead of clipping.
+  function fitSlide(s){
+    const fit = s.querySelector(':scope > .fit'); if(!fit) return;
+    fit.style.transform = 'none';
+    if(!s.clientWidth || !s.clientHeight) return;         // hidden slide — can't measure
+    const cs = getComputedStyle(s);
+    const availW = s.clientWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const availH = s.clientHeight - parseFloat(cs.paddingTop)  - parseFloat(cs.paddingBottom);
+    const w = fit.scrollWidth, h = fit.scrollHeight;
+    if(!w || !h || availW <= 0 || availH <= 0) return;
+    let k = Math.min(availW / w, availH / h);
+    k = Math.max(0.4, Math.min(k, 2.6));
+    fit.style.transform = 'scale(' + k + ')';
+  }
+  function fitActive(){ requestAnimationFrame(function(){ fitSlide(slides[i]); }); }
+  // Chart.js sizes a responsive canvas from its container's getBoundingClientRect, which INCLUDES our fit
+  // transform. Resizing a chart while a slide is scaled would therefore bake the scaled size into the
+  // canvas and blow the content past the frame. Always drop the transforms first.
+  function unfit(){ slides.forEach(function(s){
+    const f = s.querySelector(':scope > .fit'); if(f) f.style.transform = 'none'; }); }
+  window.addEventListener('resize', function(){
+    if(document.body.classList.contains('printing')) slides.forEach(fitSlide); else fitActive();
+  });
+
   function render(){
     slides.forEach((s,n)=> s.classList.toggle('active', n===i));
     counter.textContent = (i+1) + ' / ' + slides.length;
     progress.style.width = ((i+1)/slides.length*100) + '%';
+    fitActive();
     const n = slides[i].getAttribute('data-notes') || '';
     notes.innerHTML = '<b>Slide ' + (i+1) + ' notes:</b> ' + (n || '—');
     location.hash = '#' + (i+1);
@@ -193,21 +260,29 @@
     primaryColor:'#1e293b', mainBkg:'#1e293b', primaryBorderColor:'#475569', nodeBorder:'#475569',
     primaryTextColor:'#f1f5f9', nodeTextColor:'#f1f5f9', textColor:'#f1f5f9', titleColor:'#f1f5f9',
     lineColor:'#64748b', secondaryColor:'#0b1120', tertiaryColor:'#0b1120',
-    clusterBkg:'rgba(148,163,184,0.08)', clusterBorder:'#334155', edgeLabelBackground:'#0f172a'
+    clusterBkg:'rgba(148,163,184,0.08)', clusterBorder:'#334155', edgeLabelBackground:'#0f172a',
+    attributeBackgroundColorOdd:'#111c31', attributeBackgroundColorEven:'#0b1424'   /* ER rows — dark, readable */
   } : {
     darkMode:false, background:'transparent', fontFamily:"system-ui,-apple-system,'Segoe UI',Roboto,sans-serif", fontSize:'14px',
     primaryColor:'#f1f5f9', mainBkg:'#f1f5f9', primaryBorderColor:'#94a3b8', nodeBorder:'#94a3b8',
     primaryTextColor:'#0f172a', nodeTextColor:'#0f172a', textColor:'#0f172a', titleColor:'#0f172a',
     lineColor:'#64748b', secondaryColor:'#f1f5f9', tertiaryColor:'#f1f5f9',
-    clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff'
+    clusterBkg:'rgba(2,132,199,0.06)', clusterBorder:'#cbd5e1', edgeLabelBackground:'#ffffff',
+    attributeBackgroundColorOdd:'#ffffff', attributeBackgroundColorEven:'#eef2f8'   /* ER rows — light */
   }; }
-  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return;
-    var dark = document.documentElement.getAttribute('data-theme')==='dark';
-    mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
-      flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
-    _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
-    var _nodes=_mmd.map(function(m){ return m[0]; });
-    try{ return withMeasurable(_nodes, function(){ return mermaid.run({ nodes:_nodes }); }); }catch(e){} }
+  var _rendering = null;
+  function renderMermaid(){ if(typeof mermaid==='undefined' || !_mmd.length) return _rendering || Promise.resolve();
+    // Serialize: chain each render off the previous so two mermaid.run() calls never overlap (overlap
+    // corrupts Mermaid's shared state → intermittent "Syntax error in text" that clears on refresh).
+    _rendering = Promise.resolve(_rendering).catch(function(){}).then(function(){
+      var dark = document.documentElement.getAttribute('data-theme')==='dark';
+      mermaid.initialize({ startOnLoad:false, theme:'base', themeVariables:mmVars(dark),
+        flowchart:{ curve:'basis', padding:14, useMaxWidth:true }, securityLevel:'loose' });
+      _mmd.forEach(function(m){ m[0].removeAttribute('data-processed'); m[0].innerHTML = m[1]; });
+      var _nodes = _mmd.map(function(m){ return m[0]; });
+      return withMeasurable(_nodes, function(){ return mermaid.run({ nodes:_nodes }); });
+    }).then(fitActive, fitActive);
+    return _rendering; }
   // Mermaid measures label text in the live DOM. A diagram inside a hidden container
   // (an inactive tab panel, an off-screen slide) measures 0, dagre then emits
   // "translate(undefined, NaN)" and Mermaid paints its generic "Syntax error" SVG.
@@ -234,7 +309,6 @@
     return r;
   }
 
-
   // PDF export via the browser's print dialog ("Save as PDF"). Fully offline.
   // Set PRINT_NOTES=true to also print each slide's speaker notes beneath it.
   const PRINT_NOTES = false;
@@ -245,11 +319,14 @@
   window.addEventListener('beforeprint', function(){
     document.body.classList.add('printing');
     if(PRINT_NOTES) document.body.classList.add('print-notes');
+    unfit();
     void document.body.offsetHeight;      // force reflow so canvases pick up print layout
     eachChart(c=> c.resize());
+    slides.forEach(fitSlide);             // every slide is visible when printing — fit each
   });
   window.addEventListener('afterprint', function(){
     document.body.classList.remove('printing','print-notes');
+    unfit();
     eachChart(c=> c.resize());
     render();
   });
@@ -267,6 +344,11 @@
   // Capture any Mermaid sources, then apply saved/initial theme (renders diagrams + sets Chart.js defaults).
   initMermaidSources();
   (function(){ let t='dark'; try{ t=localStorage.getItem('viz-theme')||'dark'; }catch(e){} setTheme(t); })();
+
+  // Re-fit once web/system fonts and the full page have settled (text metrics change the content size).
+  fitActive();
+  window.addEventListener('load', fitActive);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitActive); }
 
   // CHART_INIT placeholder below: build any per-slide charts here using Chart.js. Don't hardcode
   // tick/grid colors — leave them out so they follow the theme via Chart.defaults.

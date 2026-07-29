@@ -24,6 +24,20 @@ const fs = require('fs');
 const path = require('path');
 const LIB_DIR = path.join(__dirname, '..', 'lib');
 const TPL_DIR = path.join(__dirname, '..', 'templates');
+const FONT_DIR = path.join(__dirname, '..', 'fonts');
+
+// Offline designer-font presets. Each inlines its bundled woff2 as base64 (fully self-contained) and
+// overrides --display-font / --body-font. Filled into the {{FONTS}} slot when --fonts is passed.
+const FONT_PRESETS = {
+  'fraunces-inter': {
+    faces: [
+      { family: 'Fraunces', file: 'fraunces-variable.woff2', weight: '100 900' },
+      { family: 'Inter',    file: 'inter-variable.woff2',    weight: '100 900' },
+    ],
+    display: "'Fraunces', Georgia, 'Times New Roman', serif",
+    body: "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+  },
+};
 
 const CDN = {
   chart: '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>',
@@ -39,6 +53,7 @@ function parseArgs(a) {
     else if (k === '--content') o.content = a[++i];
     else if (k === '--out') o.out = a[++i];
     else if (k === '--libs') o.libs = a[++i].split(',').map(s => s.trim()).filter(Boolean);
+    else if (k === '--fonts') o.fonts = a[++i];
     else if (k === '--cdn') o.cdn = true;
     else if (k === '--check') o.check = a[++i];
   }
@@ -56,6 +71,20 @@ function resolveTemplate(t) {
 function stripGuidance(h) {
   // Remove only the "… placeholder below …" guidance comments (never touches inlined libs — libs are added later).
   return h.replace(/<!--[\s\S]*?-->/g, m => (/placeholder below/.test(m) ? '' : m));
+}
+
+function fontBlock(name) {
+  const p = FONT_PRESETS[name];
+  if (!p) throw new Error('unknown --fonts preset: ' + name + ' (use ' + Object.keys(FONT_PRESETS).join('|') + ')');
+  const faces = p.faces.map(f => {
+    const file = path.join(FONT_DIR, f.file);
+    if (!fs.existsSync(file)) throw new Error('bundled font missing: ' + file);
+    const b64 = fs.readFileSync(file).toString('base64');
+    return `@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};font-display:swap;` +
+           `src:url(data:font/woff2;base64,${b64}) format('woff2');}`;
+  }).join('');
+  // The :root override comes after the template's own :root (the {{FONTS}} slot sits at the end of <head>), so it wins.
+  return `<style>${faces}:root{ --display-font:${p.display}; --body-font:${p.body}; }</style>`;
 }
 
 function libBlock(libs, cdn) {
@@ -108,7 +137,9 @@ function validate(html, opts) {
   // Mermaid used but not inlined/loaded? A <pre class="mermaid"> with no library renders as raw text (a
   // broken-looking diagram). This is an ERROR on the final/checked document; skipped pre-inline (allowLib),
   // where {{LIB}} is still a placeholder and the library is legitimately not present yet.
-  if (!opts.allowLib && /<pre class="mermaid"/.test(html) && !/mermaid\.(min\.)?js|cdn.*mermaid|function\(JM/i.test(html)) {
+  // Use `skel` (script/style bodies stripped) for the <pre> presence so a literal "<pre class=\"mermaid\">" inside
+  // a JS guidance comment doesn't count; check the raw html for the library (it lives in a stripped <script>).
+  if (!opts.allowLib && /<pre class="mermaid"/.test(skel) && !/mermaid\.(min\.)?js|cdn.*mermaid|function\(JM/i.test(html)) {
     errs.push('a <pre class="mermaid"> diagram is present but the Mermaid library is not inlined — it will render as raw text. Inline Mermaid (build with --libs mermaid, or add it to the {{LIB}} slot).');
   }
 
@@ -149,6 +180,8 @@ function main() {
     if (k === 'LIB' || k === 'LIBS' || k === 'CDN') continue;
     html = html.split('{{' + k + '}}').join(val == null ? '' : String(val));
   }
+  // 2b) fill the {{FONTS}} slot with an inlined designer-font preset if requested (base64 is safe text).
+  if (o.fonts) html = html.split('{{FONTS}}').join(fontBlock(o.fonts));
   // 3) drop any remaining non-LIB placeholders (unused optional slots) so validation is meaningful
   html = html.replace(/\{\{(?!LIB\}\})[A-Z_]+\}\}/g, '');
   // 4) validate BEFORE inlining libraries (skeleton is clean; errors are readable). {{LIB}} is expected here.
